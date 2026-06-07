@@ -8,12 +8,13 @@ methodology is shared; the runtime contract is not.
 
 ## What It Provides
 
-- A Codex plugin manifest at `.codex-plugin/plugin.json`
+- A Codex marketplace manifest at `.agents/plugins/marketplace.json`
+- A Codex plugin manifest at `plugins/promode-codex/.codex-plugin/plugin.json`
 - Bundled `SessionStart` hooks, plus project-local hook install support, that
   inject the Promode main-agent brief and check project-agent drift
 - Codex skills for setup, audits, handoff, subagent recovery, and
   discovery-to-determinism testing strategy
-- Project-scoped custom-agent templates under `standard/agents/`
+- Project-scoped custom-agent templates under `plugins/promode-codex/standard/agents/`
 - Validation scripts that check the hook output and custom-agent TOML
 
 ## Codex Adaptation
@@ -35,18 +36,19 @@ Promode for Codex differs from the Claude Code plugin in important ways:
 ## Install From GitHub
 
 Codex installs plugins from a marketplace source, not directly from an
-arbitrary plugin folder. This repository is both the marketplace source and the
-plugin: `.agents/plugins/marketplace.json` points at the repository root, where
-`.codex-plugin/plugin.json` lives.
+arbitrary plugin folder. This repository is the marketplace source:
+`.agents/plugins/marketplace.json` points at the plugin payload in
+`plugins/promode-codex/`.
 
 ```bash
 codex plugin marketplace add mikekelly/promode-codex
 codex plugin marketplace upgrade
+codex plugin add promode-codex@promode-codex
 ```
 
-Then open Codex, run `/plugins`, select the added marketplace, and install
-**Promode for Codex**. Start a new thread after installation so Codex loads the
-plugin's skills and hooks.
+Then start a new thread so Codex loads the plugin's skills and hooks. You can
+also open Codex, run `/plugins`, select **Promode for Codex**, and install it
+from the plugin UI.
 
 For a fixed release, pass a tag or branch:
 
@@ -67,7 +69,7 @@ The marketplace manifest in this repo uses this shape:
       "name": "promode-codex",
       "source": {
         "source": "local",
-        "path": "./"
+        "path": "./plugins/promode-codex"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -108,14 +110,14 @@ From a Codex session with this plugin installed and enabled:
 For a direct local install of project agents from this repo:
 
 ```bash
-python3 scripts/install-project-agents.py /path/to/project
+python3 plugins/promode-codex/scripts/install-project-agents.py /path/to/project
 ```
 
 ## Validate
 
 ```bash
-python3 scripts/validate-promode-codex.py
-python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .
+python3 plugins/promode-codex/scripts/validate-promode-codex.py
+python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/promode-codex
 ```
 
 The first script validates Promode-specific assumptions. The second validates
@@ -138,5 +140,5 @@ This repo is tuned against current Codex docs for:
 - Hooks: https://developers.openai.com/codex/hooks
 - Subagents: https://developers.openai.com/codex/subagents
 
-See `skills/managing-promode-codex/references/codex-assumptions.md` for the
-exact assumptions captured in the plugin.
+See `plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md`
+for the exact assumptions captured in the plugin.

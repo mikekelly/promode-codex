@@ -22,6 +22,7 @@ Run from the `promode-codex` repo:
 
 ```bash
 CODEX_REPO="$(git rev-parse --show-toplevel)"
+CODEX_PLUGIN_ROOT="$CODEX_REPO/plugins/promode-codex"
 CLAUDE_REPO="${PROMODE_REPO:-$(cd "$CODEX_REPO/.." && pwd)/promode}"
 
 git -C "$CODEX_REPO" status --short
@@ -41,17 +42,17 @@ has moved files.
 
 | Shared concern | Claude Promode | Promode for Codex |
 | --- | --- | --- |
-| Main-agent methodology | `plugins/promode/PROMODE_MAIN_AGENT.md` | `standard/PROMODE_CODEX_MAIN.md` |
-| Implementer | `plugins/promode/agents/implementer.md` | `standard/agents/promode_implementer.toml` |
-| Reviewer | `plugins/promode/agents/code-reviewer.md` | `standard/agents/promode_reviewer.toml` |
-| Debugger | `plugins/promode/agents/debugger.md` | `standard/agents/promode_debugger.toml` |
-| Verifier | `plugins/promode/agents/verifier.md` | `standard/agents/promode_verifier.toml` |
-| Environment manager | `plugins/promode/agents/environment-manager.md` | `standard/agents/promode_environment_manager.toml` |
-| Product designer | `plugins/promode/agents/product-design-expert.md` | `standard/agents/promode_product_designer.toml` |
-| Agent analyzer | `plugins/promode/agents/agent-analyzer.md` | `standard/agents/promode_agent_analyzer.toml` |
-| Shared skills | `plugins/promode/skills/` | `skills/` |
-| Hooks | `plugins/promode/hooks/` | `hooks/` and project-local `.codex/hooks/` installer output |
-| Validation | `scripts/check-*.sh` | `scripts/validate-promode-codex.py` and plugin validator |
+| Main-agent methodology | `plugins/promode/PROMODE_MAIN_AGENT.md` | `plugins/promode-codex/standard/PROMODE_CODEX_MAIN.md` |
+| Implementer | `plugins/promode/agents/implementer.md` | `plugins/promode-codex/standard/agents/promode_implementer.toml` |
+| Reviewer | `plugins/promode/agents/code-reviewer.md` | `plugins/promode-codex/standard/agents/promode_reviewer.toml` |
+| Debugger | `plugins/promode/agents/debugger.md` | `plugins/promode-codex/standard/agents/promode_debugger.toml` |
+| Verifier | `plugins/promode/agents/verifier.md` | `plugins/promode-codex/standard/agents/promode_verifier.toml` |
+| Environment manager | `plugins/promode/agents/environment-manager.md` | `plugins/promode-codex/standard/agents/promode_environment_manager.toml` |
+| Product designer | `plugins/promode/agents/product-design-expert.md` | `plugins/promode-codex/standard/agents/promode_product_designer.toml` |
+| Agent analyzer | `plugins/promode/agents/agent-analyzer.md` | `plugins/promode-codex/standard/agents/promode_agent_analyzer.toml` |
+| Shared skills | `plugins/promode/skills/` | `plugins/promode-codex/skills/` |
+| Hooks | `plugins/promode/hooks/` | `plugins/promode-codex/hooks/` and project-local `.codex/hooks/` installer output |
+| Validation | `scripts/check-*.sh` | `plugins/promode-codex/scripts/validate-promode-codex.py` and plugin validator |
 | Runbooks | `RUNBOOKS.md`, `runbooks/` | `RUNBOOKS.md`, `runbooks/` |
 
 ## Procedure
@@ -60,9 +61,9 @@ has moved files.
 
    ```bash
    find "$CLAUDE_REPO/plugins/promode/agents" -maxdepth 1 -type f | sort
-   find "$CODEX_REPO/standard/agents" -maxdepth 1 -type f | sort
+   find "$CODEX_PLUGIN_ROOT/standard/agents" -maxdepth 1 -type f | sort
    find "$CLAUDE_REPO/plugins/promode/skills" -maxdepth 2 -type f | sort
-   find "$CODEX_REPO/skills" -maxdepth 2 -type f | sort
+   find "$CODEX_PLUGIN_ROOT/skills" -maxdepth 2 -type f | sort
    find "$CLAUDE_REPO/runbooks" -maxdepth 1 -type f | sort
    find "$CODEX_REPO/runbooks" -maxdepth 1 -type f | sort
    ```
@@ -88,7 +89,7 @@ has moved files.
 
    ```bash
    rg -n "TDD|Evidence|operator seam|determin|runbook|delegate|verify|report" \
-     "$CLAUDE_REPO/plugins/promode/agents" "$CODEX_REPO/standard/agents"
+     "$CLAUDE_REPO/plugins/promode/agents" "$CODEX_PLUGIN_ROOT/standard/agents"
    ```
 
 4. **Compare skills.**
@@ -130,9 +131,9 @@ has moved files.
    When a shared methodology change is real, update every Codex home that
    carries it in the same change:
 
-   - `standard/PROMODE_CODEX_MAIN.md`
-   - relevant `standard/agents/promode_*.toml`
-   - relevant `skills/*`
+   - `plugins/promode-codex/standard/PROMODE_CODEX_MAIN.md`
+   - relevant `plugins/promode-codex/standard/agents/promode_*.toml`
+   - relevant `plugins/promode-codex/skills/*`
    - `README.md`, `AGENTS.md`, or runbooks if behavior changed
    - validation scripts when the invariant should be enforced
 
@@ -142,8 +143,8 @@ has moved files.
 8. **Validate.**
 
    ```bash
-   python3 scripts/validate-promode-codex.py
-   python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .
+   python3 plugins/promode-codex/scripts/validate-promode-codex.py
+   python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/promode-codex
    ```
 
    If skill files or runbooks changed, also run the available skill/repo
@@ -184,5 +185,5 @@ Sources:
 ## See also
 
 - Hub: [`../RUNBOOKS.md`](../RUNBOOKS.md)
-- Codex assumptions: [`../skills/managing-promode-codex/references/codex-assumptions.md`](../skills/managing-promode-codex/references/codex-assumptions.md)
-- Promode audit skill: [`../skills/promode-audit/SKILL.md`](../skills/promode-audit/SKILL.md)
+- Codex assumptions: [`../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md`](../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md)
+- Promode audit skill: [`../plugins/promode-codex/skills/promode-audit/SKILL.md`](../plugins/promode-codex/skills/promode-audit/SKILL.md)

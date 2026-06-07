@@ -1,23 +1,25 @@
 # Repository Guidance
 
-This repository is a Codex plugin. Keep Claude Code compatibility concerns out
-of this repo; the sibling `promode` repository owns the Claude Code plugin.
+This repository is a Codex plugin marketplace. The actual Codex plugin lives
+under `plugins/promode-codex/`. Keep Claude Code compatibility concerns out of
+this repo; the sibling `promode` repository owns the Claude Code plugin.
 
 ## Commands
 
 - Validate Promode-specific assumptions:
-  `python3 scripts/validate-promode-codex.py`
+  `python3 plugins/promode-codex/scripts/validate-promode-codex.py`
 - Validate Codex plugin shape:
-  `python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .`
+  `python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/promode-codex`
 
 ## Structure
 
-- `.codex-plugin/plugin.json` - Codex plugin manifest
-- `hooks/` - plugin-bundled lifecycle hooks
-- `standard/PROMODE_CODEX_MAIN.md` - main-session Promode brief injected by hook
-- `standard/agents/` - project-scoped Codex custom-agent templates
-- `skills/` - bundled Codex skills
-- `scripts/` - local validation and install helpers
+- `.agents/plugins/marketplace.json` - Codex marketplace manifest
+- `plugins/promode-codex/.codex-plugin/plugin.json` - Codex plugin manifest
+- `plugins/promode-codex/hooks/` - plugin-bundled lifecycle hooks
+- `plugins/promode-codex/standard/PROMODE_CODEX_MAIN.md` - main-session Promode brief injected by hook
+- `plugins/promode-codex/standard/agents/` - project-scoped Codex custom-agent templates
+- `plugins/promode-codex/skills/` - bundled Codex skills
+- `plugins/promode-codex/scripts/` - local validation and install helpers
 - `RUNBOOKS.md` and `runbooks/` - repeatable maintenance procedures
 
 ## Codex Runtime Rules

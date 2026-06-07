@@ -8,7 +8,7 @@
       "name": "promode-codex",
       "source": {
         "source": "local",
-        "path": "./"
+        "path": "./plugins/promode-codex"
       },
       "policy": {
         "installation": "AVAILABLE",

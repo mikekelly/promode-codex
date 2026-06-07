@@ -15,6 +15,7 @@ import tomllib
 
 
 ROOT = Path(__file__).resolve().parents[1]
+MARKETPLACE_ROOT = ROOT.parents[1]
 AGENTS = {
     "promode_implementer",
     "promode_reviewer",
@@ -33,7 +34,11 @@ def fail(message: str) -> None:
 
 def check_file(path: Path) -> None:
     if not path.is_file():
-        fail(f"missing file: {path.relative_to(ROOT)}")
+        try:
+            label = path.relative_to(ROOT)
+        except ValueError:
+            label = path
+        fail(f"missing file: {label}")
 
 
 def validate_manifest() -> None:
@@ -54,7 +59,7 @@ def validate_manifest() -> None:
 
 
 def validate_marketplace() -> None:
-    path = ROOT / ".agents" / "plugins" / "marketplace.json"
+    path = MARKETPLACE_ROOT / ".agents" / "plugins" / "marketplace.json"
     check_file(path)
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("name") != "promode-codex":
@@ -70,8 +75,8 @@ def validate_marketplace() -> None:
     plugin = plugins[0]
     if plugin.get("name") != "promode-codex":
         fail("marketplace plugin name must be promode-codex")
-    if plugin.get("source") != {"source": "local", "path": "./"}:
-        fail("marketplace plugin source must point at the repository root")
+    if plugin.get("source") != {"source": "local", "path": "./plugins/promode-codex"}:
+        fail("marketplace plugin source must point at ./plugins/promode-codex")
     if plugin.get("policy") != {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL",
