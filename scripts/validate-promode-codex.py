@@ -42,6 +42,11 @@ def validate_manifest() -> None:
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("name") != "promode-codex":
         fail("plugin name must be promode-codex")
+    description = data.get("description", "")
+    if not isinstance(description, str) or "Codex" not in description:
+        fail("plugin description must be Codex-specific")
+    if "Claude Code" in description:
+        fail("plugin description must not mention Claude Code")
     if data.get("skills") != "./skills/":
         fail("plugin manifest must point skills to ./skills/")
     if "hooks" in data:

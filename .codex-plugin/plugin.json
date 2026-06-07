@@ -1,7 +1,7 @@
 {
   "name": "promode-codex",
-  "version": "2.9.0",
-  "description": "Promode methodology adapted for Codex",
+  "version": "2.9.1",
+  "description": "Promode for Codex helps Codex plan, implement, review, and verify software with Promode's evidence-driven workflow.",
   "author": {
     "name": "Mike Kelly",
     "email": "mikekelly321@gmail.com"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Promode for Codex",
-    "shortDescription": "Run Promode's TDD, review, and delegation methodology in Codex.",
-    "longDescription": "Promode for Codex packages a Codex-tuned main-agent brief, project setup workflows, custom-agent templates, and methodology skills for evidence-driven AI-assisted software development.",
+    "shortDescription": "Run Promode's planning, TDD, review, and delegation workflow in Codex.",
+    "longDescription": "Promode for Codex packages a Codex-tuned main-agent brief, project setup workflows, custom-agent templates, and methodology skills for evidence-driven AI-assisted software development in Codex.",
     "developerName": "Mike Kelly",
     "category": "Productivity",
     "capabilities": [
