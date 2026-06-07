@@ -12,11 +12,15 @@ Read:
 3. Preserve non-Promode custom agents.
 4. Do not touch `AGENTS.md`.
 5. Remind the user that changed hooks need `/hooks` review and trust.
-6. Verify all seven Promode files exist.
+6. Remind the user to restart Codex, resume the project thread, or start a
+   fresh session in the project so refreshed `.codex/agents/*.toml` files are
+   exposed as custom-agent roles.
+7. Verify all seven Promode files exist.
 </process>
 
 <success_criteria>
 The project Promode hooks and custom-agent files match the plugin templates,
 the main brief is not copied into `.codex/`, and no non-Promode project agent
-files were removed.
+files were removed. The user has clear hook-trust and restart/resume
+instructions.
 </success_criteria>

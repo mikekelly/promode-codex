@@ -1,4 +1,8 @@
 .DS_Store
 *.pyc
 __pycache__/
-.codex/tmp/
+# This marketplace repo regenerates its local Promode setup with
+# plugins/promode-codex/scripts/install-project-agents.py. Do not generalize
+# this rule to user projects where .codex/ may contain project-owned hooks,
+# agents, and config.
+/.codex/

@@ -7,6 +7,11 @@ Checked against current Codex docs and the local Codex CLI on 2026-06-06.
 Codex plugins have `.codex-plugin/plugin.json` at plugin root. The root may also
 include `skills/`, `hooks/`, `.mcp.json`, `.app.json`, and `assets/`.
 
+The source repository is a marketplace wrapper with
+`.agents/plugins/marketplace.json` and `plugins/promode-codex/`. Installed plugin
+cache copies contain only the plugin payload. Validators must not require the
+source marketplace wrapper when they are run from an installed plugin cache.
+
 If `hooks/hooks.json` exists, Codex discovers it by default when plugin hooks
 are enabled; the manifest does not need an explicit `hooks` field.
 
@@ -74,6 +79,11 @@ Optional settings can use normal Codex config keys such as `sandbox_mode`,
 
 Subagents inherit parent runtime settings. Custom agents are config layers, not
 hard security boundaries.
+
+After project custom agents are installed or refreshed, the already-running
+Codex session may not expose those new role names immediately. Tell users to
+restart Codex, resume the project thread, or start a fresh session in the
+project so Codex reloads `.codex/agents/*.toml`.
 
 ## Local CLI observations
 

@@ -95,8 +95,9 @@ merges the Promode `SessionStart` hook pair into `.codex/hooks.json`. The main
 brief stays bundled in the plugin; the project-local main hook reads it through
 `PLUGIN_ROOT`.
 
-Review and trust the project hooks with `/hooks`, then start or resume a Codex
-session so the `SessionStart` hooks run.
+Review and trust the project hooks with `/hooks`, then restart Codex, resume the
+project thread, or start a fresh session in the project. This lets `SessionStart`
+hooks run and lets Codex expose the newly installed project custom-agent roles.
 
 ## Installation While Developing Locally
 
@@ -105,8 +106,9 @@ From a Codex session with this plugin installed and enabled:
 1. Ask Codex: `Set up promode-codex in this project`.
 2. The `managing-promode-codex` skill installs project agents into
    `.codex/agents/` and project-local `SessionStart` hooks under `.codex/`.
-3. Review and trust the project hook with `/hooks`, then start or resume a
-   Codex session so the main brief is loaded.
+3. Review and trust the project hook with `/hooks`, then restart Codex, resume
+   the project thread, or start a fresh session in the project so the main brief
+   and project custom-agent roles are loaded.
 
 For a direct local install of project agents from this repo:
 
@@ -117,13 +119,36 @@ python3 plugins/promode-codex/scripts/install-project-agents.py /path/to/project
 ## Validate
 
 ```bash
-python3 plugins/promode-codex/scripts/validate-promode-codex.py
+scripts/check
+```
+
+Or run the component checks directly:
+
+```bash
+python3 plugins/promode-codex/scripts/validate-promode-codex.py --mode source
 python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/promode-codex
 ```
 
 The first script validates Promode-specific assumptions. The second validates
 Codex plugin manifest and skill shape according to the local Codex plugin
 validator.
+
+When running from an installed plugin cache rather than this source marketplace
+repo, use the validator's default auto mode or `--mode package`:
+
+```bash
+python3 /path/to/installed/promode-codex/scripts/validate-promode-codex.py
+python3 /path/to/installed/promode-codex/scripts/validate-promode-codex.py --mode package
+```
+
+Package mode validates the plugin payload and project installer behavior without
+requiring the source-repo `.agents/plugins/marketplace.json` wrapper.
+
+## Project Knowledge
+
+- [Project framing](docs/PROJECT_FRAMING.md) - goals, risks, non-goals, and runtime boundaries
+- [Decision index](docs/DECISIONS.md) - durable Codex adaptation decisions
+- [Validation traceability](docs/TRACEABILITY.md) - product/runtime claims mapped to checks
 
 ## Runbooks
 

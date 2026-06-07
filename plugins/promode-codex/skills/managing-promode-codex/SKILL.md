@@ -24,6 +24,9 @@ approval.
   hooks are enabled.
 - Codex skips non-managed hooks until the user reviews and trusts them with `/hooks`.
 - Codex custom agents live in `~/.codex/agents/` or `<project>/.codex/agents/`.
+- A running session may not expose newly installed or refreshed project custom
+  agents by name until Codex is restarted, resumed, or a fresh session is
+  started in the project.
 - Codex subagents inherit parent runtime settings; custom-agent files are config
   layers, not hard isolation boundaries.
 - Codex transcript paths are convenience fields, not stable APIs.
@@ -64,6 +67,8 @@ A project is set up when:
 - `.codex/agents/promode_*.toml` exists for all standard Promode agents.
 - Existing non-Promode `.codex/agents` files are preserved.
 - The user knows project hooks must be trusted through `/hooks`.
+- The user knows to restart, resume, or start a fresh Codex session so newly
+  installed custom-agent roles are available.
 - `AGENTS.md` was left alone unless the user explicitly accepted scaffolding.
 - Optional tracking files were created only when missing and approved.
 </success_criteria>

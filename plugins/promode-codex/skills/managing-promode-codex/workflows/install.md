@@ -106,14 +106,19 @@ the user agrees:
 Offer to create missing `KANBAN_BOARD.md`, `IDEAS.md`, and `DONE.md`. Create
 only missing files and only after user approval.
 
-## Step 5: Explain Hook Trust
+## Step 5: Explain Hook Trust and Session Refresh
 
 The main Promode brief and project-agent drift check come from project-local
 `SessionStart` hooks. The brief itself stays bundled in the plugin and is read
 through `PLUGIN_ROOT`. Codex will skip non-managed hooks until the user reviews
 and trusts them through `/hooks`. Tell the user to open `/hooks`, review the
-project hooks, and trust them. After trusting, start or resume a Codex session
-so `SessionStart` runs.
+project hooks, and trust them.
+
+Also tell the user to restart Codex, resume the project thread, or start a fresh
+session in the project after install. Newly installed `.codex/agents/*.toml`
+files may not be exposed as custom-agent roles inside the already-running
+thread, and `SessionStart` hooks only run on a new start/resume/clear/compact
+event.
 
 ## Step 6: Verify
 
@@ -123,11 +128,27 @@ ls .codex/agents/promode_*.toml
 ls .codex/hooks/promode-main-context.py .codex/hooks/promode-agent-drift.py .codex/hooks.json
 ```
 
+When validating the plugin from this source marketplace repo, run:
+```bash
+python3 plugins/promode-codex/scripts/validate-promode-codex.py --mode source
+```
+
+When validating from an installed plugin cache, run the installed validator in
+auto/default mode or package mode:
+```bash
+python3 {plugin_root}/scripts/validate-promode-codex.py
+python3 {plugin_root}/scripts/validate-promode-codex.py --mode package
+```
+Installed plugin cache copies do not contain the source repo's
+`.agents/plugins/marketplace.json`, so package validation must not require that
+marketplace wrapper.
+
 Then report installed files and any optional scaffolding performed.
 </process>
 
 <success_criteria>
 Installation is complete when the project hooks exist, all seven
 `.codex/agents/promode_*.toml` files exist, and the user has clear hook-trust
-instructions. `.codex/PROMODE_CODEX_MAIN.md` should not be installed.
+and restart/resume instructions. `.codex/PROMODE_CODEX_MAIN.md` should not be
+installed.
 </success_criteria>

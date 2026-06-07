@@ -39,6 +39,11 @@ HOOKS = [
     },
 ]
 HOOK_SOURCES = [MAIN_HOOK_SOURCE, DRIFT_HOOK_SOURCE]
+SESSION_REFRESH_MESSAGE = (
+    "Restart or resume Codex in this project so newly installed Promode "
+    "custom-agent roles are discovered. If hooks changed, confirm trust with "
+    "/hooks first."
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -100,6 +105,7 @@ def main() -> int:
             print(f"installed {hook_target_dir / source.name}")
         print(f"merged SessionStart hook into {hooks_json}")
 
+    print(SESSION_REFRESH_MESSAGE)
     return 0
 
 

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+python3 plugins/promode-codex/scripts/validate-promode-codex.py --mode source
+python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/promode-codex
+
+if [ -f /Users/mike/.agents/skills/developing-skills/scripts/validate-repo.rb ]; then
+  ruby /Users/mike/.agents/skills/developing-skills/scripts/validate-repo.rb .
+fi
