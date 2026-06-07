@@ -22,7 +22,9 @@ project custom-agent files for subagent behavior.
 
 Current Codex docs support plugin hooks, but this local harness reports
 `plugin_hooks=false`. The reliable setup path here installs a project-local
-`.codex/hooks.json` SessionStart hook pair plus `.codex/PROMODE_CODEX_MAIN.md`.
+`.codex/hooks.json` SessionStart hook pair. The project-local main hook reads
+the bundled plugin brief through `PLUGIN_ROOT`; it does not install a project
+copy of `PROMODE_CODEX_MAIN.md`.
 
 The plugin also ships bundled hooks for Codex builds where plugin hooks are
 enabled.

@@ -9,9 +9,10 @@ Promode for Codex has two layers:
 1. **Plugin layer** - this plugin supplies skills and bundled `SessionStart`
    hooks for Codex builds where plugin hooks are enabled.
 2. **Project layer** - the setup workflow installs a project-local
-   `SessionStart` hook pair, `PROMODE_CODEX_MAIN.md`, and project-scoped custom
-   agents under `.codex/`. This is the reliable path in the current local
-   harness, where `plugin_hooks` is disabled but regular hooks are enabled.
+   `SessionStart` hook pair and project-scoped custom agents under `.codex/`.
+   The project-local main hook reads the bundled plugin brief through
+   `PLUGIN_ROOT`. This is the reliable path in the current local harness, where
+   `plugin_hooks` is disabled but regular hooks are enabled.
 
 The project's `AGENTS.md` is project-owned. Promode may offer to scaffold it
 when missing, but must never overwrite or rewrite it without explicit user
@@ -49,7 +50,7 @@ install/update/audit and the surrounding context does not disambiguate it.
 
 <reference_index>
 - `references/codex-assumptions.md` - verified Codex behavior this plugin relies on.
-- `../../standard/PROMODE_CODEX_MAIN.md` - main-session brief loaded by the project or plugin hook.
+- `../../standard/PROMODE_CODEX_MAIN.md` - bundled main-session brief loaded by the project or plugin hook.
 - `../../standard/agents/*.toml` - project custom-agent templates installed by workflows.
 - `../../hooks/hooks.json`, `../../hooks/promode-main-context.py`, and
   `../../hooks/promode-agent-drift.py` - bundled hooks.
@@ -57,7 +58,6 @@ install/update/audit and the surrounding context does not disambiguate it.
 
 <success_criteria>
 A project is set up when:
-- `.codex/PROMODE_CODEX_MAIN.md` exists.
 - `.codex/hooks/promode-main-context.py` exists.
 - `.codex/hooks/promode-agent-drift.py` exists.
 - `.codex/hooks.json` has a Promode `SessionStart` hook.

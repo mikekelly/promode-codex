@@ -90,9 +90,10 @@ Set up promode-codex in this project.
 ```
 
 The `managing-promode-codex` skill installs project-scoped Promode agents into
-`.codex/agents/`, copies the main-session brief and hook scripts into
-`.codex/`, and merges the Promode `SessionStart` hook pair into
-`.codex/hooks.json`.
+`.codex/agents/`, copies project-local hook scripts into `.codex/hooks/`, and
+merges the Promode `SessionStart` hook pair into `.codex/hooks.json`. The main
+brief stays bundled in the plugin; the project-local main hook reads it through
+`PLUGIN_ROOT`.
 
 Review and trust the project hooks with `/hooks`, then start or resume a Codex
 session so the `SessionStart` hooks run.

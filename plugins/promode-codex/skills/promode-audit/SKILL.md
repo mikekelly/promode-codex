@@ -29,10 +29,12 @@ architecture dimensions; otherwise use built-in `explorer` or `default`.
 1. **Frame** - Skim `AGENTS.md` and `README` to understand stack, size, commands,
    and product purpose. If no `AGENTS.md` exists, note that as an orientation gap.
    Also do a setup pre-flight:
-   - For Codex, `.codex/PROMODE_CODEX_MAIN.md`, `.codex/hooks.json`,
+   - For Codex, `.codex/hooks.json`,
      `.codex/hooks/promode-main-context.py`,
      `.codex/hooks/promode-agent-drift.py`, and
      `.codex/agents/promode_*.toml` are expected after setup.
+     `.codex/PROMODE_CODEX_MAIN.md` is a stale artifact; the hook should read
+     the bundled plugin brief through `PLUGIN_ROOT`.
    - Flag stale Claude Promode leftovers (`.claude/PROMODE_MAIN_AGENT.md`,
      `.claude/hooks/promode-main-context.sh`, or a Promode SessionStart entry
      in `.claude/settings.json`) as warnings because they can double-inject

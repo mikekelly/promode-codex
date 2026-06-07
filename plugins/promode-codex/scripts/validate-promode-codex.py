@@ -148,6 +148,9 @@ def validate_installer() -> None:
     with tempfile.TemporaryDirectory(prefix="promode-codex-install-") as tmp:
         project = Path(tmp)
         (project / ".git").mkdir()
+        stale_brief = project / ".codex" / "PROMODE_CODEX_MAIN.md"
+        stale_brief.parent.mkdir()
+        stale_brief.write_text("stale project brief\n", encoding="utf-8")
         installer = ROOT / "scripts" / "install-project-agents.py"
         for _ in range(2):
             proc = subprocess.run(
@@ -161,12 +164,13 @@ def validate_installer() -> None:
 
         hooks_json = project / ".codex" / "hooks.json"
         for path in (
-            project / ".codex" / "PROMODE_CODEX_MAIN.md",
             project / ".codex" / "hooks" / "promode-main-context.py",
             project / ".codex" / "hooks" / "promode-agent-drift.py",
         ):
             if not path.is_file():
                 fail(f"installer missing file: {path}")
+        if (project / ".codex" / "PROMODE_CODEX_MAIN.md").exists():
+            fail("installer should not copy PROMODE_CODEX_MAIN.md into the project")
         commands = [
             hook.get("command")
             for group in json.loads(hooks_json.read_text(encoding="utf-8"))["hooks"][
@@ -174,7 +178,10 @@ def validate_installer() -> None:
             ]
             for hook in group.get("hooks", [])
         ]
-        expected_main = 'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/promode-main-context.py"'
+        expected_main = (
+            f"PLUGIN_ROOT={shlex.quote(str(ROOT))} "
+            'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/promode-main-context.py"'
+        )
         expected_drift = (
             f"PLUGIN_ROOT={shlex.quote(str(ROOT))} "
             'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/promode-agent-drift.py"'

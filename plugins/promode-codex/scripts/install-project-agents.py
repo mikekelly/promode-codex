@@ -13,12 +13,15 @@ import sys
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 AGENT_SOURCE = PLUGIN_ROOT / "standard" / "agents"
-BRIEF_SOURCE = PLUGIN_ROOT / "standard" / "PROMODE_CODEX_MAIN.md"
 MAIN_HOOK_SOURCE = PLUGIN_ROOT / "hooks" / "promode-main-context.py"
 DRIFT_HOOK_SOURCE = PLUGIN_ROOT / "hooks" / "promode-agent-drift.py"
-MAIN_HOOK_COMMAND = 'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/promode-main-context.py"'
+PLUGIN_ROOT_ENV = f"PLUGIN_ROOT={shlex.quote(str(PLUGIN_ROOT))} "
+MAIN_HOOK_COMMAND = (
+    f"{PLUGIN_ROOT_ENV}"
+    'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/promode-main-context.py"'
+)
 DRIFT_HOOK_COMMAND = (
-    f"PLUGIN_ROOT={shlex.quote(str(PLUGIN_ROOT))} "
+    f"{PLUGIN_ROOT_ENV}"
     'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/promode-agent-drift.py"'
 )
 HOOK_MATCHER = "startup|resume|clear|compact"
@@ -45,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--agents-only",
         action="store_true",
-        help="Install only .codex/agents templates; skip hook and brief",
+        help="Install only .codex/agents templates; skip hooks",
     )
     return parser.parse_args()
 
@@ -61,6 +64,7 @@ def main() -> int:
     target = codex_dir / "agents"
     hook_target_dir = codex_dir / "hooks"
     hooks_json = codex_dir / "hooks.json"
+    stale_brief = codex_dir / "PROMODE_CODEX_MAIN.md"
     agent_files = sorted(AGENT_SOURCE.glob("promode_*.toml"))
     if not agent_files:
         print(f"no agent templates found in {AGENT_SOURCE}", file=sys.stderr)
@@ -71,7 +75,8 @@ def main() -> int:
         for source in agent_files:
             print(f"would copy {source.name} -> {target / source.name}")
         if not args.agents_only:
-            print(f"would copy {BRIEF_SOURCE.name} -> {codex_dir / BRIEF_SOURCE.name}")
+            if stale_brief.exists():
+                print(f"would remove stale {stale_brief}")
             for source in HOOK_SOURCES:
                 print(f"would copy {source.name} -> {hook_target_dir / source.name}")
             print(f"would merge SessionStart hook into {hooks_json}")
@@ -85,11 +90,12 @@ def main() -> int:
     if not args.agents_only:
         codex_dir.mkdir(parents=True, exist_ok=True)
         hook_target_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(BRIEF_SOURCE, codex_dir / BRIEF_SOURCE.name)
+        if stale_brief.exists():
+            stale_brief.unlink()
+            print(f"removed stale {stale_brief}")
         for source in HOOK_SOURCES:
             shutil.copy2(source, hook_target_dir / source.name)
         merge_hooks_json(hooks_json)
-        print(f"installed {codex_dir / BRIEF_SOURCE.name}")
         for source in HOOK_SOURCES:
             print(f"installed {hook_target_dir / source.name}")
         print(f"merged SessionStart hook into {hooks_json}")

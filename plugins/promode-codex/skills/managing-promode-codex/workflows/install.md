@@ -44,9 +44,13 @@ Overwrite only these Promode-owned files. Preserve every other file under
 
 Also copy:
 
-- `standard/PROMODE_CODEX_MAIN.md` -> `.codex/PROMODE_CODEX_MAIN.md`
 - `hooks/promode-main-context.py` -> `.codex/hooks/promode-main-context.py`
 - `hooks/promode-agent-drift.py` -> `.codex/hooks/promode-agent-drift.py`
+
+Do not copy `standard/PROMODE_CODEX_MAIN.md` into the project. The main hook
+receives `PLUGIN_ROOT` and reads the bundled plugin brief from there. If an
+older install left `.codex/PROMODE_CODEX_MAIN.md` behind, remove that
+Promode-owned stale file.
 
 Merge these project hooks into `.codex/hooks.json`, preserving existing
 non-Promode hooks:
@@ -60,7 +64,7 @@ non-Promode hooks:
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/promode-main-context.py\"",
+            "command": "PLUGIN_ROOT={plugin_root_shell_quoted} python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/promode-main-context.py\"",
             "statusMessage": "Loading Promode for Codex"
           },
           {
@@ -105,7 +109,8 @@ only missing files and only after user approval.
 ## Step 5: Explain Hook Trust
 
 The main Promode brief and project-agent drift check come from project-local
-`SessionStart` hooks. Codex will skip non-managed hooks until the user reviews
+`SessionStart` hooks. The brief itself stays bundled in the plugin and is read
+through `PLUGIN_ROOT`. Codex will skip non-managed hooks until the user reviews
 and trusts them through `/hooks`. Tell the user to open `/hooks`, review the
 project hooks, and trust them. After trusting, start or resume a Codex session
 so `SessionStart` runs.
@@ -115,14 +120,14 @@ so `SessionStart` runs.
 Check:
 ```bash
 ls .codex/agents/promode_*.toml
-ls .codex/PROMODE_CODEX_MAIN.md .codex/hooks/promode-main-context.py .codex/hooks/promode-agent-drift.py .codex/hooks.json
+ls .codex/hooks/promode-main-context.py .codex/hooks/promode-agent-drift.py .codex/hooks.json
 ```
 
 Then report installed files and any optional scaffolding performed.
 </process>
 
 <success_criteria>
-Installation is complete when the project hooks/brief exist, all seven
+Installation is complete when the project hooks exist, all seven
 `.codex/agents/promode_*.toml` files exist, and the user has clear hook-trust
-instructions.
+instructions. `.codex/PROMODE_CODEX_MAIN.md` should not be installed.
 </success_criteria>

@@ -16,8 +16,10 @@ until the user reviews and trusts the current hook definition in `/hooks`.
 The local harness checked during repo creation reported `hooks=true`,
 `plugins=true`, and `plugin_hooks=false`. Therefore this plugin's reliable setup
 path installs project-local `.codex/hooks.json` hooks and `.codex/hooks/`
-scripts. The bundled plugin hooks remain as a forward-compatible path for Codex
-builds where plugin hooks are enabled.
+scripts. The project-local main hook receives `PLUGIN_ROOT` and reads the
+bundled plugin brief; it does not require a project copy of
+`PROMODE_CODEX_MAIN.md`. The bundled plugin hooks remain as a
+forward-compatible path for Codex builds where plugin hooks are enabled.
 
 ## Hook wire format
 

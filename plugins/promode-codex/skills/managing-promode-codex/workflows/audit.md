@@ -16,7 +16,6 @@ Check:
    - `hooks/promode-agent-drift.py`
    - `standard/PROMODE_CODEX_MAIN.md`
 2. Project hook and custom agents:
-   - `.codex/PROMODE_CODEX_MAIN.md`
    - `.codex/hooks/promode-main-context.py`
    - `.codex/hooks/promode-agent-drift.py`
    - `.codex/hooks.json` with a Promode `SessionStart` entry
@@ -27,6 +26,8 @@ Check:
    - `.codex/agents/promode_environment_manager.toml`
    - `.codex/agents/promode_product_designer.toml`
    - `.codex/agents/promode_agent_analyzer.toml`
+   - `.codex/PROMODE_CODEX_MAIN.md` should be absent; the hook should read the
+     bundled plugin brief through `PLUGIN_ROOT`.
 3. `AGENTS.md` status:
    - Present and project-owned, or missing with recommendation to scaffold.
    - Do not treat missing `AGENTS.md` as a Promode install failure.
