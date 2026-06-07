@@ -1,0 +1,20 @@
+{
+  "name": "promode-codex",
+  "interface": {
+    "displayName": "Promode for Codex"
+  },
+  "plugins": [
+    {
+      "name": "promode-codex",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

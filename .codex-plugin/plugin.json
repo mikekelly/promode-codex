@@ -1,0 +1,38 @@
+{
+  "name": "promode-codex",
+  "version": "2.9.0",
+  "description": "Promode methodology adapted for Codex",
+  "author": {
+    "name": "Mike Kelly",
+    "email": "mikekelly321@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "subagents",
+    "tdd",
+    "software-development"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Promode for Codex",
+    "shortDescription": "Run Promode's TDD, review, and delegation methodology in Codex.",
+    "longDescription": "Promode for Codex packages a Codex-tuned main-agent brief, project setup workflows, custom-agent templates, and methodology skills for evidence-driven AI-assisted software development.",
+    "developerName": "Mike Kelly",
+    "category": "Productivity",
+    "capabilities": [
+      "Skills",
+      "Hooks",
+      "Subagents",
+      "Code Review",
+      "Testing"
+    ],
+    "defaultPrompt": [
+      "Set up promode-codex in this project.",
+      "Audit this repo against the Promode methodology.",
+      "Use Promode to plan this feature."
+    ],
+    "brandColor": "#0F766E"
+  }
+}

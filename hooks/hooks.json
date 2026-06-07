@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${PLUGIN_ROOT}/hooks/promode-main-context.py",
+            "statusMessage": "Loading Promode for Codex"
+          },
+          {
+            "type": "command",
+            "command": "python3 ${PLUGIN_ROOT}/hooks/promode-agent-drift.py",
+            "statusMessage": "Checking Promode project agents"
+          }
+        ]
+      }
+    ]
+  }
+}
