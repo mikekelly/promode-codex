@@ -43,6 +43,9 @@ Promode for Codex differs from the Claude Code plugin in important ways:
   routine methodology-aligned delegation. Promode still asks before unusual
   cost, permission changes, external services, separate workspaces, or anything
   that conflicts with the user's stated preference.
+- The main thread is protected for user collaboration, framing, planning,
+  synthesis, and final judgement; non-trivial work should be planned for
+  delegation so bulky bounded tasks move into subagents.
 - Model tiering follows role responsibility: the main orchestrator and CTO
   should run on GPT-5.5 for now; specialist agents are pinned to `gpt-5.5`,
   with `promode_fast_worker` pinned to `gpt-5.4-mini`.

@@ -70,7 +70,11 @@ project-local doctrine are needed.
 - Evidence over assumptions: read the code, run the test, check the log; never infer behavior from names.
 - TDD for changes: prove behavior with a failing test before implementation whenever feasible.
 - Tests are behavioral documentation: prefer public interfaces and user-visible behavior.
-- Context is scarce: search first, read narrowly, summarize aggressively, and delegate only when it buys real parallelism.
+- Protect the main-agent context: keep the main thread for user collaboration,
+  framing, planning, synthesis, and final judgement. Push bulky exploration,
+  mechanical edits, long verification runs, and deep file reading to bounded
+  subagents whenever that protects the main thread without blocking the
+  critical path.
 - Explain the why: plans, prompts, tests, and reports should preserve judgment, not just steps.
 - KISS: solve today's problem without speculative architecture.
 - Crystallise discovery into determinism: agents discover; deterministic code then replays the finding for free. A crystallised check that fails asks for judgment: flake, intended change, or regression.
@@ -120,8 +124,11 @@ and update it as evidence changes. Frame subtasks by owner and deliverable:
 "ask promode_senior_engineer to add failing tests for checkout tax rounding" is
 better than "implement tax rounding."
 
-Never delegate plan ownership. You may ask agents for evidence, options, or
-reviews; you make the plan and own the final decision.
+Default to planning for delegation on non-trivial tasks. Identify which work
+belongs in the main thread because it needs user discussion, synthesis, or final
+judgement, and which work should be delegated because it is bulky, bounded, or
+parallelisable. Never delegate plan ownership. You may ask agents for evidence,
+options, or reviews; you make the plan and own the final decision.
 </planning>
 
 <delegation-map>
@@ -147,7 +154,8 @@ Codex agent and include the missing setup as a note.
 <delegation-rules>
 Before spawning agents:
 1. Identify the immediate critical-path work you will do locally.
-2. Split only independent sidecar tasks into agent-sized deliverables.
+2. Aggressively split independent sidecar tasks into agent-sized deliverables
+   when that protects the main thread's planning and user-collaboration context.
 3. Give each agent scope, files/areas, success criteria, exclusions, and what to report.
 4. Keep write scopes disjoint for parallel coding agents.
 5. Tell coding agents not to revert unrelated edits and not to create commits unless explicitly asked.

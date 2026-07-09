@@ -283,6 +283,9 @@ def validate_activation_flow() -> None:
         ".codex/promode/docs/discovery-to-determinism.md",
         "GPT-5.5",
         "GPT-5.4-mini",
+        "Protect the main-agent context",
+        "Default to planning for delegation on non-trivial tasks",
+        "Aggressively split independent sidecar tasks",
     ):
         if needle not in activate_text:
             fail(f"activate skill missing mirrored Promode surface: {needle}")
@@ -329,6 +332,7 @@ def validate_doctrine_bundle() -> None:
         "tdd-non-negotiable",
         "operator-seam-bulk-below-ui",
         "sync-skill",
+        "main-context-for-orchestration",
         ".codex/promode/docs/opinion-register.md",
     ):
         if needle not in register:
