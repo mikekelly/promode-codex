@@ -31,8 +31,9 @@ STALE_PROJECT_PATHS = (
     Path(".codex") / "hooks" / "promode-agent-drift.py",
 )
 SESSION_REFRESH_MESSAGE = (
-    "Restart or resume Codex in this project so newly installed Promode "
-    "custom-agent roles and project-local doctrine are discovered. Run "
+    "Start a new Codex task or session in this project so newly installed "
+    "Promode custom-agent roles and project-local doctrine are discovered. "
+    "If the roles do not appear, restart Codex. Run "
     "`$promode-codex:activate` at the start of each session to load the Promode "
     "main-agent brief."
 )
@@ -265,7 +266,7 @@ def warn_if_upgrade_available() -> None:
     )
     print(
         "Run `codex plugin marketplace upgrade promode-codex` "
-        "(or omit the name to upgrade all marketplaces), then restart or resume Codex."
+        "then start a new task or session. If the update is not visible, restart Codex."
     )
 
 

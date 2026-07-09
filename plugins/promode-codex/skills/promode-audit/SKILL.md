@@ -5,8 +5,7 @@ description: "Audit how well a repository aligns with the Promode methodology in
 
 <objective>
 Run the Promode methodology audit and return a prioritised improvement plan.
-This is the Codex command-equivalent surface for Claude Promode's
-`/promode:promode-audit` command.
+This is the explicit Codex skill for repository methodology audits.
 </objective>
 
 <dispatch>

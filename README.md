@@ -1,88 +1,206 @@
 # Promode for Codex
 
-Promode for Codex adapts the Promode AI-assisted software development
-methodology to Codex's plugin, skill, and subagent runtime.
+Promode for Codex makes Codex opinionated. It gives the main agent an
+evidence-backed development methodology to enforce, so you describe the outcome
+and Codex drives the work through framing, planning, implementation, review, and
+verification without making you supervise the process.
 
-This is intentionally a separate plugin from the Claude Code version. The
-methodology is shared; the runtime contract is not.
+Promode is designed around expensive, high-quality reasoning. GPT-5.6 Sol keeps
+the whole picture: your intent, product goals, constraints, trade-offs, and final
+judgement. Bounded exploration, implementation loops, tests, logs, and other
+context-heavy work move to GPT-5.5 specialists or the GPT-5.4-mini fast worker.
+Frontier context is spent where coherence matters; operational work gets fresh,
+focused contexts.
 
-## Who It Is For
+The methodology is explicit rather than ambient. You activate it in sessions
+where you want Promode, and the main agent then owns process, challenges
+unsupported work, delegates bounded execution, reconciles every result, and
+verifies the agreed outcome. Your project's `AGENTS.md` stays project-owned.
 
-Promode for Codex serves project leads who want the main Codex agent to enforce
-an evidence-backed development process, contributors who need predictable
-project-scoped agents and doctrine, and maintainers adapting Promode to Codex's
-runtime. The canonical [project framing](docs/PROJECT_FRAMING.md) defines these
-role-based users and jobs, product goals, risks, and non-goals.
-
-## What It Provides
-
-- A Codex marketplace manifest at `.agents/plugins/marketplace.json`
-- A Codex plugin manifest at `plugins/promode-codex/.codex-plugin/plugin.json`
-- `$promode-codex:activate` to load the Promode main-agent brief into the
-  current session
-- `$promode-codex:sync` to sync project-scoped custom agents and remove
-  legacy hook-based Promode artifacts
-- Command-equivalent Codex skills for audits and handoff
-- Project-scoped custom-agent templates under `plugins/promode-codex/standard/agents/`
-- Project-local Promode doctrine templates under `plugins/promode-codex/standard/docs/`
-- Validation scripts that check activation/sync behavior and custom-agent TOML
-
-## Codex Adaptation
-
-Promode for Codex differs from the Claude Code plugin in important ways:
-
-- Promode activation is explicit. Run `$promode-codex:activate` at the start of
-  each Codex session where you want Promode behavior.
-- Project setup no longer installs Promode main-session hooks. `$promode-codex:sync`
-  removes legacy Promode hook artifacts from older installs.
-- Codex custom agents live in `.codex/agents/*.toml` or `~/.codex/agents/*.toml`;
-  they are not bundled plugin agent files.
-- Copied project custom agents read shared Promode doctrine from
-  `.codex/promode/docs/opinion-register.md`; they do not reference versioned
-  plugin-cache paths.
-- The exposed skill surface is deliberately small: `activate`, `sync`,
-  `promode-audit`, and `handoff`. Larger methodology mechanics such as
-  discovery-to-determinism live in synced docs and role prompts, matching the
-  current Claude Promode shape more closely.
-- Codex subagents inherit parent runtime settings and are config layers, not
-  separate hard-permission boundaries.
-- Codex transcript paths are convenience fields, not stable APIs.
-- Activation authorizes Promode's methodology for the session, including
-  routine methodology-aligned delegation. Promode still asks before unusual
-  cost, permission changes, external services, separate workspaces, or anything
-  that conflicts with the user's stated preference.
-- The main thread is protected for user collaboration, framing, planning,
-  synthesis, and final judgement; non-trivial work should be planned for
-  delegation so bulky bounded tasks move into subagents.
-- Model tiering follows role responsibility: the main orchestrator and CTO
-  should run on GPT-5.6 Sol (`gpt-5.6-sol`) with high reasoning effort;
-  specialist agents are pinned to `gpt-5.5`, with `promode_fast_worker`
-  pinned to `gpt-5.4-mini`.
+It is also deliberately transparent and forkable: four focused skills, eleven
+custom-agent templates, a readable opinion register, and deterministic setup and
+validation scripts. There are no services, MCP servers, or lifecycle hooks to
+trust. Install this fork as-is if its taste fits, or change the opinions and make
+it yours.
 
 ## Install From GitHub
 
-Codex installs plugins from a marketplace source, not directly from an
-arbitrary plugin folder. This repository is the marketplace source:
-`.agents/plugins/marketplace.json` points at the plugin payload in
-`plugins/promode-codex/`.
+Codex installs plugins from marketplace sources. This repository is the
+marketplace; its `.agents/plugins/marketplace.json` points at the plugin payload
+under `plugins/promode-codex/`.
+
+### Codex CLI
 
 ```bash
 codex plugin marketplace add mikekelly/promode-codex
-codex plugin marketplace upgrade
 codex plugin add promode-codex@promode-codex
 ```
 
-Then start a new thread so Codex loads the plugin's skills. You can
-also open Codex, run `/plugins`, select **Promode for Codex**, and install it
-from the plugin UI.
+Alternatively, add the marketplace, start `codex`, run `/plugins`, choose the
+`promode-codex` marketplace, and install **Promode for Codex**. Start a new Codex
+session after installation so its bundled skills are available.
 
-For a fixed release, pass a tag or branch:
+### Codex desktop app
+
+Add the marketplace with the CLI command above, restart the desktop app, open
+**Plugins** from Codex, choose the `promode-codex` marketplace, and install
+**Promode for Codex**. Start a new task after installation.
+
+To pin a release or branch, add the marketplace with `--ref`:
 
 ```bash
 codex plugin marketplace add mikekelly/promode-codex --ref <tag-or-branch>
 ```
 
-The marketplace manifest in this repo uses this shape:
+## Set Up a Project
+
+After installing and enabling the plugin:
+
+1. Start a new task or session in the target project and run
+   `$promode-codex:sync`.
+2. Start another new task or session so Codex discovers the installed project
+   custom agents. If the roles do not appear, restart Codex.
+3. Run `$promode-codex:activate` in the new main-agent session.
+
+`sync` installs or refreshes the eleven project-scoped Promode agents under
+`.codex/agents/` and mirrors shared doctrine into `.codex/promode/docs/`. It
+preserves non-Promode agents and hooks, prunes stale Promode-owned files, and
+removes legacy Promode hook artifacts from older installations. It also warns
+when the installed marketplace copy is older than the latest available release.
+
+`activate` loads the main Promode brief for the current main-agent session.
+Activation is explicit and session-scoped; run it at the start of every session
+where you want Promode. Subagents use their own role instructions instead of the
+main-agent orchestration brief.
+
+Run `$promode-codex:promode-audit` after setup to assess the repository and get
+a prioritised plan for bringing it into alignment with the methodology.
+
+## The Problem It Solves
+
+An unconfigured coding agent has no durable development taste. Every session can
+re-litigate how much discovery is enough, when to test, what counts as done,
+which decisions belong to the user, and where project knowledge should live.
+Reusable skills help with individual workflows, but they still leave you to
+remember when to invoke them and how to coordinate the whole delivery process.
+
+Promode makes the main agent both orchestrator and methodology enforcer. It
+clarifies the outcome, challenges features that lack evidence or a real goal,
+keeps the plan coherent, delegates bounded work, reviews the evidence, and does
+not call the job complete until the result is verified.
+
+It also protects the main context. Long file reads, implementation churn, test
+output, and GUI traversal can crowd out the goal and degrade judgement. Promode
+keeps collaboration and final decisions in the main session while sending
+operational work to fresh specialist contexts.
+
+## Who It Is For
+
+- **Codex project leads** who want the main agent to own process and momentum
+  without giving up control over intent or consequential decisions.
+- **Contributors and operators** who want predictable project-scoped agents and
+  doctrine without losing project-owned Codex configuration.
+- **Promode maintainers** who want shared methodology adapted to verified Codex
+  behavior with deterministic checks against runtime drift.
+
+The canonical [project framing](docs/PROJECT_FRAMING.md) records these jobs with
+the product goals, risks, non-goals, and runtime boundaries they serve.
+
+## How It Works
+
+**The main agent orchestrates and decides.** It keeps the user conversation,
+problem framing, plan ownership, synthesis, hard trade-offs, review of
+load-bearing evidence, and final judgement.
+
+**Subagents execute bounded jobs.** Exploration, implementation, debugging,
+review, verification, environment work, and mechanical edits go to focused
+roles with their own instructions and fresh context. Delegation never transfers
+accountability: the main agent must inspect and integrate, reject, rework, or
+explicitly defer every completed result.
+
+**Model choice follows cognitive load.** The main orchestrator and the CTO role
+use GPT-5.6 Sol with high reasoning when the surface makes it available.
+Engineering, debugging, review, verification, audit, product, and knowledge
+specialists use GPT-5.5. The fast worker uses GPT-5.4-mini for mechanical work
+and UI driving. The CTO is reserved for prepared decisions that are materially
+expensive to unwind, not merely large or cross-cutting tasks.
+
+**Delivery is Codex-native.** The main orchestration brief lives in the explicit
+`activate` skill rather than `AGENTS.md`. Project custom agents live under
+`.codex/agents/`. Shared role doctrine is synced into `.codex/promode/docs/` so
+copied agents do not depend on versioned plugin-cache paths. Codex transcript
+paths remain convenience data, never a stable API.
+
+### Agents
+
+| Agent | Job |
+| --- | --- |
+| `promode_chief_technology_officer` | Prepared hard-to-reverse architecture, domain-model, technology, and large-refactor decisions |
+| `promode_senior_engineer` | Complex or architecture-adjacent implementation through TDD |
+| `promode_fast_worker` | Mechanical edits, straightforward tests, formatting, and GUI driving |
+| `promode_code_reviewer` | Read-only correctness, regression, design, and test-quality review |
+| `promode_debugger` | Evidence-led root-cause diagnosis and the fastest deterministic reproduction |
+| `promode_verifier` | Outside-in running-behavior verification with a clear PASS or FAIL |
+| `promode_environment_manager` | Development services, scripts, health checks, and repeatable environment operations |
+| `promode_product_design_expert` | Product and UX decisions grounded in user evidence |
+| `promode_agent_analyzer` | Agent-run evidence, failure classification, and recovery recommendations |
+| `promode_auditor` | Repository methodology audit and prioritised improvement plan |
+| `promode_constraint_reinforcer` | Hoist non-obvious, load-bearing constraints into agent orientation |
+
+## The Opinions
+
+Promode is opinionated on purpose. The canonical
+[opinion register](plugins/promode-codex/standard/docs/opinion-register.md)
+names every opinion, gives it a stable ID, and records which prompts, agents,
+skills, or docs carry it.
+
+- **Evidence over assumptions.** Read the code, run the check, inspect the
+  result, and label unsupported claims.
+- **Justification precedes implementation.** Significant work needs an observed
+  problem, a real goal or risk link, falsifiable success, and explicit
+  non-goals. Methodology alignment does not prove a feature should exist.
+- **TDD is the default.** Establish one failing behavioral test for the right
+  reason, make the smallest passing change, then refactor with tests green.
+- **Tests are behavioral documentation.** Prefer public interfaces and
+  user-visible outcomes over assertions coupled to implementation details.
+- **Discovery becomes determinism.** Worthwhile findings become checks, tests,
+  scripts, maps, recognizers, or runbooks instead of disappearing into chat.
+- **Acceptance feedback stays fast.** Exercise most behavior below the GUI
+  through an existing operator seam; reserve real UI verification for defects
+  that only manifest there.
+- **The main context is for coherence.** Delegate bulky operational work while
+  keeping plan ownership, synthesis, and final judgement local.
+- **Project knowledge is durable.** Keep reusable facts and constraints in the
+  `AGENTS.md` knowledge graph, surprising decisions in decision records, and
+  repeatable procedures in runbooks.
+- **Verification is explicit.** State what ran, what passed, and what remains
+  unverified; “looks right” is not done.
+
+## Fork It
+
+Methodology is taste. This repository is the `mikekelly` Codex fork: installing
+it as-is means adopting these defaults, while forking it lets you change the
+opinions, roles, and enforcement level to match your own way of working.
+
+The opinion register is the customization map. Change an opinion in
+`plugins/promode-codex/standard/docs/opinion-register.md`, update the homes named
+by that row, run the repository checks, then use `$promode-codex:sync` to refresh
+the project-local generated mirror. Do not edit `.codex/promode/docs/` directly;
+it is generated setup state.
+
+## Plugin Layout
+
+- `.agents/plugins/marketplace.json` — marketplace catalog
+- `plugins/promode-codex/.codex-plugin/plugin.json` — plugin manifest
+- `plugins/promode-codex/skills/activate/` — explicit main-session activation
+- `plugins/promode-codex/skills/sync/` — project custom-agent and doctrine sync
+- `plugins/promode-codex/skills/promode-audit/` — methodology audit
+- `plugins/promode-codex/skills/handoff/` — session handoff
+- `plugins/promode-codex/standard/agents/` — eleven project custom-agent templates
+- `plugins/promode-codex/standard/docs/` — synced Promode doctrine
+- `plugins/promode-codex/scripts/` — setup and validation helpers
+
+The marketplace entry points at the plugin with this shape:
 
 ```json
 {
@@ -107,105 +225,71 @@ The marketplace manifest in this repo uses this shape:
 }
 ```
 
-## Set Up a Project
+## Develop From This Checkout
 
-After the plugin is installed and enabled, run these from the target project:
+This checkout is already a repository marketplace. Open it as the Codex
+project, then install **Promode for Codex** from the repo marketplace using the
+desktop Plugins directory or the CLI `/plugins` browser. Start a new task or
+session after installing or refreshing the plugin.
 
-```text
-$promode-codex:sync
-$promode-codex:activate
-```
+When testing project setup, run `$promode-codex:sync`, start another new task or
+session, and then run `$promode-codex:activate`.
 
-`$promode-codex:sync` installs or refreshes the eleven project-scoped Promode
-agents in `.codex/agents/` and removes legacy Promode hook artifacts left by
-older installs. It also mirrors Promode doctrine into `.codex/promode/docs/` so
-copied agents can read the project-local opinion register. It prunes stale
-Promode-owned `.codex/agents/promode_*.toml` files while preserving
-non-Promode agents and non-Promode hooks. After a successful sync, it performs a
-best-effort GitHub version check and warns if the installed plugin copy is older
-than the latest available Promode for Codex version.
-
-Restart Codex, resume the project thread, or start a fresh session in the
-project after sync so Codex exposes the newly installed project custom-agent
-roles.
-
-`$promode-codex:activate` contains the main Promode brief and makes Promode
-active for the current main-agent session. Activation is explicit and
-session-scoped; run it at the start of each main-agent session where you want
-Promode behavior. It is not intended for subagents, which should use their
-custom-agent instructions.
-
-## Installation While Developing Locally
-
-From a Codex session with this plugin installed and enabled:
-
-1. Run `$promode-codex:sync`.
-2. Restart Codex, resume the project thread, or start a fresh session in the
-   project so project custom-agent roles are loaded.
-3. Run `$promode-codex:activate` in each session where you want Promode
-   behavior.
-
-For a direct local install of project agents from this repo:
+The helper below only syncs project custom agents and doctrine from this
+checkout; it does not install or refresh the plugin itself:
 
 ```bash
 python3 plugins/promode-codex/scripts/install-project-agents.py /path/to/project
 ```
 
-Then restart or resume Codex in that project and run `$promode-codex:activate`.
-Use `--skip-upgrade-check` for deterministic local validation or offline runs.
+Start a new task or session in that project afterward, then run
+`$promode-codex:activate`. Use `--skip-upgrade-check` for deterministic local
+validation or offline runs.
 
 ## Validate
+
+Run the complete repository check:
 
 ```bash
 scripts/check
 ```
 
-The same command runs in GitHub Actions. Local Codex-only validators run
-automatically when their default paths are present; hosted CI skips missing
-local validators and still runs the repo-owned source validation.
+The same command runs in GitHub Actions. It always runs the repo-owned source
+validation. Codex-local plugin and skill validators run when their configured
+paths are available and are skipped explicitly in hosted environments where
+they are absent.
 
-Or run the component checks directly:
+Component checks are also available:
 
 ```bash
 python3 plugins/promode-codex/scripts/validate-promode-codex.py --mode source
 python3 /Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/promode-codex
 ```
 
-The first script validates Promode-specific assumptions. The second validates
-Codex plugin manifest and skill shape according to the local Codex plugin
-validator.
+From an installed plugin cache, use auto mode or `--mode package`; those modes
+validate the plugin payload without requiring the source marketplace wrapper.
 
-When running from an installed plugin cache rather than this source marketplace
-repo, use the validator's default auto mode or `--mode package`:
+## Project Knowledge And Runbooks
 
-```bash
-python3 /path/to/installed/promode-codex/scripts/validate-promode-codex.py
-python3 /path/to/installed/promode-codex/scripts/validate-promode-codex.py --mode package
-```
+- [Project framing](docs/PROJECT_FRAMING.md) — users/jobs, goals, risks,
+  non-goals, and runtime boundaries
+- [Decision index](docs/DECISIONS.md) — durable Codex adaptation decisions
+- [Validation traceability](docs/TRACEABILITY.md) — product and runtime claims
+  mapped to checks
+- [Runbook hub](RUNBOOKS.md) — repeatable maintenance procedures
 
-Package mode validates the plugin payload and project installer behavior without
-requiring the source-repo `.agents/plugins/marketplace.json` wrapper.
-
-## Project Knowledge
-
-- [Project framing](docs/PROJECT_FRAMING.md) - goals, risks, non-goals, and runtime boundaries
-- [Decision index](docs/DECISIONS.md) - durable Codex adaptation decisions
-- [Validation traceability](docs/TRACEABILITY.md) - product/runtime claims mapped to checks
-
-## Runbooks
-
-Operational maintenance runbooks live in [`RUNBOOKS.md`](RUNBOOKS.md). Start
-with [Check alignment with the Claude Code Promode repo](runbooks/check-promode-alignment.md)
-when syncing methodology, agent definitions, skills, docs, or runbooks
-from the Claude Code Promode plugin into this Codex adaptation.
+The Claude Code implementation lives in a separate repository. The
+[alignment runbook](runbooks/check-promode-alignment.md) explains how maintainers
+compare shared methodology without copying Claude-specific runtime behavior into
+this Codex plugin.
 
 ## Sources Checked
 
-This repo is tuned against current Codex docs for:
+This repository is tuned against current Codex documentation:
 
-- Plugins: https://developers.openai.com/codex/plugins/build
-- Skills: https://developers.openai.com/codex/skills
-- Subagents: https://developers.openai.com/codex/subagents
+- [Build plugins](https://learn.chatgpt.com/docs/build-plugins)
+- [Build skills](https://learn.chatgpt.com/docs/build-skills)
+- [Custom agents](https://learn.chatgpt.com/docs/agent-configuration/subagents)
 
-See `plugins/promode-codex/standard/docs/codex-assumptions.md`
-for the exact assumptions captured in the plugin.
+The exact verified assumptions are recorded in
+`plugins/promode-codex/standard/docs/codex-assumptions.md`.

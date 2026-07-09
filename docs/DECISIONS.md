@@ -55,14 +55,18 @@ Evidence:
 - [../plugins/promode-codex/scripts/install-project-agents.py](../plugins/promode-codex/scripts/install-project-agents.py)
 - [../plugins/promode-codex/standard/docs/opinion-register.md](../plugins/promode-codex/standard/docs/opinion-register.md)
 
-## D4. Restart Or Resume After Agent Install
+## D4. Start A New Task Or Session After Agent Install
 
-Decision: sync workflows tell users to restart Codex, resume the project
-thread, or start a fresh project session after installing or refreshing project
-custom agents, then run `$promode-codex:activate` where they want Promode.
+Decision: sync workflows tell users to start a new task or session after
+installing or refreshing project custom agents. If the roles do not appear,
+users restart Codex. They then run `$promode-codex:activate` where they want
+Promode.
 
 Why: a running Codex session may not expose newly installed `.codex/agents/*.toml`
-role names until the project custom-agent inventory is reloaded.
+role names until the project custom-agent inventory is reloaded. Public Codex
+documentation defines the custom-agent paths but does not promise that resuming
+an existing task reloads them, so the guidance uses a new session as the safe
+boundary and labels restart as the fallback.
 
 Evidence:
 
@@ -115,20 +119,18 @@ Evidence:
 - [../plugins/promode-codex/standard/docs/codex-assumptions.md](../plugins/promode-codex/standard/docs/codex-assumptions.md)
 - [../plugins/promode-codex/standard/agents/promode_agent_analyzer.toml](../plugins/promode-codex/standard/agents/promode_agent_analyzer.toml)
 
-## D8. Mirror Claude Promode Surface Without Re-Exposing Methodology As Skills
+## D8. Keep The Codex Skill Surface Small
 
 Decision: the Codex plugin exposes only four user-facing skills:
 `activate`, `sync`, `promode-audit`, and `handoff`. `activate` and `sync` are
-Codex delivery mechanics. `promode-audit` and `handoff` mirror Claude Promode
-slash-command surfaces. Other Promode mechanics are delivered through
+Codex delivery mechanics. `promode-audit` and `handoff` are explicit
+command-equivalent workflows. Other Promode mechanics are delivered through
 project-scoped custom-agent prompts and synced doctrine docs.
 
-Why: current Claude Promode moved away from voluntary skill invocation. Keeping
-methodology such as discovery-to-determinism and subagent recovery as exposed
-Codex skills made the Codex port look broader than Claude and put mechanics in
-the wrong user-invoked surface. Codex still needs structural skills for
-activation and sync because plugins can package skills but not directly install
-project custom-agent files.
+Why: methodology such as discovery-to-determinism and subagent recovery belongs
+in role prompts and doctrine rather than optional user-invoked skills. Codex
+still needs structural skills for activation and sync because plugins can
+package skills but not directly install project custom-agent files.
 
 Evidence:
 

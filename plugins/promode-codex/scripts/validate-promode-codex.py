@@ -212,6 +212,9 @@ def validate_manifest() -> None:
         fail("plugin description must be Codex-specific")
     if "Claude Code" in description:
         fail("plugin description must not mention Claude Code")
+    interface_text = json.dumps(data.get("interface", {}))
+    if "Claude" in interface_text:
+        fail("plugin install-surface copy must be Codex-native")
     if data.get("skills") != "./skills/":
         fail("plugin manifest must point skills to ./skills/")
     if "hooks" in data:
@@ -509,8 +512,12 @@ def validate_installer() -> None:
             )
             if proc.returncode != 0:
                 fail(f"installer exited {proc.returncode}: {proc.stderr}")
-            if "Restart or resume Codex" not in proc.stdout:
-                fail("installer should advise restarting or resuming Codex")
+            for guidance in (
+                "Start a new Codex task or session",
+                "If the roles do not appear, restart Codex",
+            ):
+                if guidance not in proc.stdout:
+                    fail(f"installer missing reload guidance: {guidance}")
             if "$promode-codex:activate" not in proc.stdout:
                 fail("installer should advise explicit Promode activation")
 
@@ -635,6 +642,74 @@ def validate_repository_policy(source_root: Path) -> None:
     for needle in ("## Who It Is For", "docs/PROJECT_FRAMING.md"):
         if needle not in readme_text:
             fail(f"README.md missing product orientation: {needle}")
+
+    opening_pitch = readme_text.split("## Install From GitHub", 1)[0]
+    for needle in (
+        "makes Codex opinionated",
+        "without making you supervise the process",
+        "transparent and forkable",
+    ):
+        if needle not in opening_pitch:
+            fail(f"README.md opening pitch missing product outcome: {needle}")
+    ordered_sections = (
+        "## Install From GitHub",
+        "## Set Up a Project",
+        "## The Problem It Solves",
+        "## How It Works",
+        "## The Opinions",
+        "## Develop From This Checkout",
+        "## Validate",
+    )
+    section_positions = [readme_text.find(section) for section in ordered_sections]
+    if any(position < 0 for position in section_positions) or section_positions != sorted(
+        section_positions
+    ):
+        fail("README.md must lead with pitch and install before deeper reference material")
+
+    install_section = readme_text.split("## Install From GitHub", 1)[-1].split(
+        "## Set Up a Project", 1
+    )[0]
+    for needle in ("### Codex CLI", "### Codex desktop app", "/plugins"):
+        if needle not in install_section:
+            fail(f"README.md must separate plugin install surfaces: {needle}")
+    if "codex plugin marketplace upgrade\n" in install_section:
+        fail("README.md initial install must not upgrade every marketplace")
+    if "start a new thread" in readme_text:
+        fail("README.md must use current task/session terminology")
+
+    setup_section = readme_text.split("## Set Up a Project", 1)[-1].split(
+        "## Develop From This Checkout", 1
+    )[0]
+    ordered_setup_markers = (
+        "$promode-codex:sync",
+        "Start another new task or session",
+        "$promode-codex:activate",
+    )
+    marker_positions = [setup_section.find(marker) for marker in ordered_setup_markers]
+    if any(position < 0 for position in marker_positions) or marker_positions != sorted(
+        marker_positions
+    ):
+        fail("README.md project setup must reload after sync before activation")
+
+    development_section = readme_text.split("## Develop From This Checkout", 1)[-1]
+    if "does not install or refresh the plugin" not in development_section:
+        fail("README.md must distinguish project-file sync from local plugin install")
+    for stale in (
+        "matching the current Claude Promode shape",
+        "Restart Codex, resume the project thread",
+    ):
+        if stale in readme_text:
+            fail(f"README.md contains stale install guidance: {stale}")
+
+    installer_text = (
+        source_root
+        / "plugins"
+        / "promode-codex"
+        / "scripts"
+        / "install-project-agents.py"
+    ).read_text(encoding="utf-8")
+    if "omit the name to upgrade all marketplaces" in installer_text:
+        fail("installer must not recommend a blanket marketplace upgrade")
 
     gitignore = source_root / ".gitignore"
     check_file(gitignore)

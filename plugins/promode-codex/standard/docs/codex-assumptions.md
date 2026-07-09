@@ -32,7 +32,7 @@ project-owned durable guidance and is inherited by subagents, while the main
 Promode brief is main-agent orchestration.
 
 Activation is session-scoped. It is intentionally not automatic; the user runs
-`$promode-codex:activate` when they want Promode behavior in a thread.
+`$promode-codex:activate` when they want Promode behavior in a task or session.
 
 The activate skill is main-agent-only. Both the activate and sync skills
 include `agents/openai.yaml` with `allow_implicit_invocation: false` so Codex
@@ -77,9 +77,10 @@ synthesis, reversibility, and final judgment; operational work normally belongs
 on the cheaper tiers.
 
 After project custom agents are installed or refreshed, the already-running
-Codex session may not expose those new role names immediately. Tell users to
-restart Codex, resume the project thread, or start a fresh session in the
-project so Codex reloads `.codex/agents/*.toml`.
+Codex session may not expose those new role names immediately. This is a local
+runtime observation rather than a documented reload guarantee. Tell users to
+start a new task or session in the project; if the roles still do not appear,
+restart Codex so it reloads `.codex/agents/*.toml`.
 
 ## Project-local doctrine bundle
 

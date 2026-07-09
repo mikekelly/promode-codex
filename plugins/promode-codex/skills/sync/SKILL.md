@@ -35,19 +35,19 @@ Read before acting:
 5. Do not install Promode main-session hooks. Promode is activated explicitly
    with `$promode-codex:activate` in each session.
 6. If the helper warns that a newer plugin is available, tell the user to run
-   `codex plugin marketplace upgrade promode-codex` or upgrade all marketplaces,
-   then restart or resume Codex.
+   `codex plugin marketplace upgrade promode-codex`, then start a new task or
+   session. If the updated plugin is not visible, restart Codex.
 7. Verify all eleven `.codex/agents/promode_*.toml` files exist and that
    `.codex/promode/docs/opinion-register.md` exists.
-8. Tell the user to restart or resume Codex so project custom-agent roles are
-   reloaded, then run `$promode-codex:activate` in sessions where they want
-   Promode behavior.
+8. Tell the user to start a new task or session so project custom-agent roles
+   are discovered. If the roles do not appear, restart Codex. Then run
+   `$promode-codex:activate` in sessions where they want Promode behavior.
 </process>
 
 <success_criteria>
 The project has the eleven Promode custom-agent files under `.codex/agents/`,
 the Promode doctrine bundle under `.codex/promode/docs/`, legacy Promode hook
 artifacts are absent, non-Promode project files were preserved, stale plugin
-cache warnings are surfaced when detected, and the user knows the restart/resume
-plus activation sequence.
+cache warnings are surfaced when detected, and the user knows the new-session,
+restart-if-needed, and activation sequence.
 </success_criteria>
