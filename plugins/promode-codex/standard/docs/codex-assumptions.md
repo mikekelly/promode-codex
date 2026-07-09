@@ -64,9 +64,9 @@ hard security boundaries.
 
 Promode model tiering is advisory for the main session and explicit for copied
 custom agents where Codex exposes stable model IDs. The main orchestrating agent
-and `promode_chief_technology_officer` should run on GPT-5.5 for now. Other
-specialist agents use `gpt-5.5`, while `promode_fast_worker` uses
-`gpt-5.4-mini`.
+and `promode_chief_technology_officer` should run on GPT-5.6 Sol
+(`gpt-5.6-sol`) with high reasoning effort when available. Other specialist
+agents use `gpt-5.5`, while `promode_fast_worker` uses `gpt-5.4-mini`.
 
 After project custom agents are installed or refreshed, the already-running
 Codex session may not expose those new role names immediately. Tell users to

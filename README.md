@@ -47,8 +47,9 @@ Promode for Codex differs from the Claude Code plugin in important ways:
   synthesis, and final judgement; non-trivial work should be planned for
   delegation so bulky bounded tasks move into subagents.
 - Model tiering follows role responsibility: the main orchestrator and CTO
-  should run on GPT-5.5 for now; specialist agents are pinned to `gpt-5.5`,
-  with `promode_fast_worker` pinned to `gpt-5.4-mini`.
+  should run on GPT-5.6 Sol (`gpt-5.6-sol`) with high reasoning effort;
+  specialist agents are pinned to `gpt-5.5`, with `promode_fast_worker`
+  pinned to `gpt-5.4-mini`.
 
 ## Install From GitHub
 
@@ -150,6 +151,10 @@ Use `--skip-upgrade-check` for deterministic local validation or offline runs.
 ```bash
 scripts/check
 ```
+
+The same command runs in GitHub Actions. Local Codex-only validators run
+automatically when their default paths are present; hosted CI skips missing
+local validators and still runs the repo-owned source validation.
 
 Or run the component checks directly:
 

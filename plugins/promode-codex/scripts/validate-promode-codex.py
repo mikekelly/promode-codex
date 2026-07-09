@@ -43,7 +43,8 @@ AGENT_CONTRACT_PHRASES = {
     ],
     "promode_chief_technology_officer": [
         "hard-to-reverse architecture",
-        "GPT-5.5 for now",
+        "GPT-5.6 Sol",
+        "high reasoning",
         "do not make code changes",
         "Delegation-ready task breakdown",
     ],
@@ -91,7 +92,7 @@ AGENT_CONTRACT_PHRASES = {
 EXPECTED_AGENT_MODELS = {
     "promode_agent_analyzer": "gpt-5.5",
     "promode_auditor": "gpt-5.5",
-    "promode_chief_technology_officer": "gpt-5.5",
+    "promode_chief_technology_officer": "gpt-5.6-sol",
     "promode_code_reviewer": "gpt-5.5",
     "promode_constraint_reinforcer": "gpt-5.5",
     "promode_debugger": "gpt-5.5",
@@ -100,6 +101,9 @@ EXPECTED_AGENT_MODELS = {
     "promode_product_design_expert": "gpt-5.5",
     "promode_senior_engineer": "gpt-5.5",
     "promode_verifier": "gpt-5.5",
+}
+EXPECTED_AGENT_REASONING_EFFORT = {
+    "promode_chief_technology_officer": "high",
 }
 READ_ONLY_AGENTS = {
     "promode_agent_analyzer",
@@ -281,6 +285,9 @@ def validate_activation_flow() -> None:
         "promode_auditor",
         "promode_constraint_reinforcer",
         ".codex/promode/docs/discovery-to-determinism.md",
+        "GPT-5.6 Sol",
+        "gpt-5.6-sol",
+        "high\n  reasoning effort",
         "GPT-5.5",
         "GPT-5.4-mini",
         "Protect the main-agent context",
@@ -360,6 +367,8 @@ def validate_doctrine_bundle() -> None:
         "Project-local doctrine bundle",
         "Custom agents",
         "Upgrade awareness",
+        "gpt-5.6-sol",
+        "high reasoning effort",
         "gpt-5.5",
         "gpt-5.4-mini",
     ):
@@ -528,6 +537,26 @@ def validate_repository_policy(source_root: Path) -> None:
     check_text = (source_root / "scripts" / "check").read_text(encoding="utf-8")
     if "validate-promode-codex.py --mode source" not in check_text:
         fail("scripts/check must run validate-promode-codex.py --mode source")
+    if "scripts/check-local-validators" not in check_text:
+        fail("scripts/check must run scripts/check-local-validators")
+    local_validator_check = source_root / "scripts" / "check-local-validators"
+    check_file(local_validator_check)
+    if not os.access(local_validator_check, os.X_OK):
+        fail("scripts/check-local-validators must be executable")
+    validate_local_validator_dispatch(source_root, local_validator_check)
+
+    ci_workflow = source_root / ".github" / "workflows" / "check.yml"
+    check_file(ci_workflow)
+    ci_text = ci_workflow.read_text(encoding="utf-8")
+    for needle in (
+        "actions/checkout",
+        "actions/setup-python",
+        "pull_request:",
+        "push:",
+        "scripts/check",
+    ):
+        if needle not in ci_text:
+            fail(f"CI workflow must run repository checks: {needle}")
 
     for path in (
         source_root / "docs" / "PROJECT_FRAMING.md",
@@ -557,6 +586,80 @@ def validate_repository_policy(source_root: Path) -> None:
     ):
         if needle not in agents_text:
             fail(f"AGENTS.md missing guidance: {needle}")
+
+
+def validate_local_validator_dispatch(source_root: Path, script: Path) -> None:
+    with tempfile.TemporaryDirectory(prefix="promode-codex-local-validators-") as tmp:
+        tmp_path = Path(tmp)
+
+        missing_plugin = tmp_path / "missing-plugin-validator.py"
+        missing_skills = tmp_path / "missing-skills-validator.rb"
+        missing_env = {
+            **os.environ,
+            "CODEX_PLUGIN_VALIDATOR": str(missing_plugin),
+            "DEVELOPING_SKILLS_VALIDATOR": str(missing_skills),
+        }
+        missing_proc = subprocess.run(
+            [str(script)],
+            cwd=source_root,
+            text=True,
+            capture_output=True,
+            check=False,
+            env=missing_env,
+        )
+        if missing_proc.returncode != 0:
+            fail(
+                "scripts/check-local-validators should pass when local validators "
+                f"are absent: stdout={missing_proc.stdout!r} stderr={missing_proc.stderr!r}"
+            )
+        for expected in (
+            f"SKIP: Codex plugin validator not found at {missing_plugin}",
+            f"SKIP: developing-skills validator not found at {missing_skills}",
+        ):
+            if expected not in missing_proc.stdout:
+                fail(f"missing local-validator skip evidence: {expected}")
+
+        stub = (
+            "from pathlib import Path\n"
+            "import os\n"
+            "import sys\n"
+            "log = Path(os.environ['PROMODE_VALIDATOR_STUB_LOG'])\n"
+            "with log.open('a', encoding='utf-8') as handle:\n"
+            "    handle.write(Path(sys.argv[0]).name + ':' + ' '.join(sys.argv[1:]) + '\\n')\n"
+        )
+        plugin_stub = tmp_path / "plugin-validator.py"
+        skills_stub = tmp_path / "skills-validator.py"
+        log_path = tmp_path / "stub.log"
+        plugin_stub.write_text(stub, encoding="utf-8")
+        skills_stub.write_text(stub, encoding="utf-8")
+        present_env = {
+            **os.environ,
+            "CODEX_PLUGIN_VALIDATOR": str(plugin_stub),
+            "CODEX_PLUGIN_VALIDATOR_RUNNER": sys.executable,
+            "DEVELOPING_SKILLS_VALIDATOR": str(skills_stub),
+            "DEVELOPING_SKILLS_VALIDATOR_RUNNER": sys.executable,
+            "PROMODE_VALIDATOR_STUB_LOG": str(log_path),
+        }
+        present_proc = subprocess.run(
+            [str(script)],
+            cwd=source_root,
+            text=True,
+            capture_output=True,
+            check=False,
+            env=present_env,
+        )
+        if present_proc.returncode != 0:
+            fail(
+                "scripts/check-local-validators should run present validators: "
+                f"stdout={present_proc.stdout!r} stderr={present_proc.stderr!r}"
+            )
+        log_text = log_path.read_text(encoding="utf-8")
+        for expected in (
+            "plugin-validator.py:plugins/promode-codex",
+            "skills-validator.py:.",
+        ):
+            if expected not in log_text:
+                fail(f"local validator dispatch missing invocation: {expected}")
 
 
 def validate_no_stale_setup_artifacts(source_root: Path) -> None:
@@ -633,6 +736,15 @@ def validate_agents() -> None:
         expected_model = EXPECTED_AGENT_MODELS.get(name)
         if expected_model is not None and data.get("model") != expected_model:
             fail(f"{path.name} must pin model {expected_model}")
+        expected_reasoning_effort = EXPECTED_AGENT_REASONING_EFFORT.get(name)
+        if (
+            expected_reasoning_effort is not None
+            and data.get("model_reasoning_effort") != expected_reasoning_effort
+        ):
+            fail(
+                f"{path.name} must pin reasoning effort "
+                f"{expected_reasoning_effort}"
+            )
         instructions = data["developer_instructions"]
         if "Hook-provided transcript paths" in instructions:
             fail(f"{path.name} contains stale hook-era transcript wording")

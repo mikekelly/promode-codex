@@ -25,6 +25,7 @@ scripts/check
 | Users are told to restart/resume after sync and activate Promode per session. | Newly installed `.codex/agents/*.toml` roles are not exposed, or the user expects automatic activation. | `validate_installer()` checks installer stdout for the restart/resume and `$promode-codex:activate` reminders. | [../plugins/promode-codex/scripts/install-project-agents.py](../plugins/promode-codex/scripts/install-project-agents.py) |
 | Standard Promode custom agents exist and define required fields. | Subagent roles are missing or invalid. | `validate_agents()` parses all `standard/agents/promode_*.toml`. | [../plugins/promode-codex/standard/agents](../plugins/promode-codex/standard/agents) |
 | Only the command-equivalent/structural skills are exposed: `activate`, `sync`, `promode-audit`, and `handoff`. | Methodology docs become voluntary skills and drift from the Claude Promode surface. | `validate_skills()` rejects missing, extra, and forbidden exposed skills. | [../plugins/promode-codex/skills](../plugins/promode-codex/skills) |
+| Pull requests and pushes run the repository check. | Contributors skip the local deterministic check before changing plugin behavior. | `.github/workflows/check.yml` runs `scripts/check`; source-mode validation checks the workflow is present. | [../.github/workflows/check.yml](../.github/workflows/check.yml) |
 | This marketplace checkout treats root `/.codex/` as generated state. | Checkout-local Promode setup state is accidentally committed or generalized to user projects. | `.gitignore` policy; `scripts/check` validates the policy in source mode. | [../.gitignore](../.gitignore) |
 | Stale Claude Promode install leftovers are absent. | Claude Code sessions double-inject or mix runtime assumptions. | Source-mode stale setup checks in `validate-promode-codex.py`. | [PROJECT_FRAMING.md](PROJECT_FRAMING.md) |
 
@@ -32,5 +33,6 @@ scripts/check
 
 - Agent and skill validation still checks structure more than methodology. When
   agent contracts change, add focused assertions for role/reporting invariants.
-- There is no CI workflow yet. `scripts/check` is the local deterministic entry
-  point and should be the command wired into CI when this repo adds one.
+- Hosted CI skips Codex-local validators when their local skill paths are not
+  present. If Codex exposes a portable plugin validator package, wire it into
+  CI so hosted validation matches local validation more closely.

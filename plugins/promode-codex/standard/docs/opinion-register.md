@@ -74,7 +74,7 @@ replacing non-Codex harness assumptions with Codex-specific runtime facts.
 | O7 `do-not-busy-poll` | Spawn, steer, wait only when blocked, and close agents; do not fill the main thread with polling noise. | activate skill |
 | O8 `transcripts-unstable` | Codex transcript paths are convenience handles, not stable APIs. Use them only as best-effort evidence when accepted. | activate skill, analyzer |
 | O9 `custom-agents-are-config-layers` | Codex custom agents tune spawned sessions; they are not hard security or isolation boundaries. | assumptions, custom agents |
-| O10 `role-model-tiering` | The main orchestrating agent and CTO should run on GPT-5.5 for now. Specialist agents default to GPT-5.5, while fast-worker uses GPT-5.4-mini for mechanical work. | activate skill, custom agents |
+| O10 `role-model-tiering` | The main orchestrating agent and CTO should run on GPT-5.6 Sol (`gpt-5.6-sol`) with high reasoning effort when available. Specialist agents default to GPT-5.5, while fast-worker uses GPT-5.4-mini for mechanical work. | activate skill, custom agents |
 | O11 `main-context-for-orchestration` | Protect the main thread for user collaboration, framing, planning, synthesis, and final judgement. Default to planning for delegation on non-trivial tasks; push bulky bounded work into subagents. | activate skill |
 
 ## Shared working principles

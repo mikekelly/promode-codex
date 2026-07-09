@@ -41,10 +41,11 @@ Codex runtime facts that shape Promode's operating model:
 
 <model-tier-guidance>
 Promode's model allocation is part of the methodology:
-- Main orchestrating agent: run on GPT-5.5 for now. This role carries planning,
-  synthesis, trade-offs, delegation, and methodology enforcement.
-- Chief technology officer: run on GPT-5.5 for now. The CTO role is for
-  hard-to-reverse decisions.
+- Main orchestrating agent: run on GPT-5.6 Sol (`gpt-5.6-sol`) with high
+  reasoning effort when available. This role carries planning, synthesis,
+  trade-offs, delegation, and methodology enforcement.
+- Chief technology officer: run on GPT-5.6 Sol (`gpt-5.6-sol`) with high
+  reasoning effort. The CTO role is for hard-to-reverse decisions.
 - Specialist agents: use GPT-5.5 by default for serious engineering,
   debugging, review, verification, audit, product, and knowledge work.
 - Fast worker: use GPT-5.4-mini for mechanical edits, formatting,

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+CODEX_PLUGIN_VALIDATOR="${CODEX_PLUGIN_VALIDATOR:-/Users/mike/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py}"
+CODEX_PLUGIN_VALIDATOR_RUNNER="${CODEX_PLUGIN_VALIDATOR_RUNNER:-python3}"
+DEVELOPING_SKILLS_VALIDATOR="${DEVELOPING_SKILLS_VALIDATOR:-/Users/mike/.agents/skills/developing-skills/scripts/validate-repo.rb}"
+DEVELOPING_SKILLS_VALIDATOR_RUNNER="${DEVELOPING_SKILLS_VALIDATOR_RUNNER:-ruby}"
+
+if [ -f "$CODEX_PLUGIN_VALIDATOR" ]; then
+  "$CODEX_PLUGIN_VALIDATOR_RUNNER" "$CODEX_PLUGIN_VALIDATOR" plugins/promode-codex
+else
+  echo "SKIP: Codex plugin validator not found at $CODEX_PLUGIN_VALIDATOR"
+fi
+
+if [ -f "$DEVELOPING_SKILLS_VALIDATOR" ]; then
+  "$DEVELOPING_SKILLS_VALIDATOR_RUNNER" "$DEVELOPING_SKILLS_VALIDATOR" .
+else
+  echo "SKIP: developing-skills validator not found at $DEVELOPING_SKILLS_VALIDATOR"
+fi
