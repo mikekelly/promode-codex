@@ -4,6 +4,10 @@ This repository is a Codex plugin marketplace. The actual Codex plugin lives
 under `plugins/promode-codex/`. Keep Claude Code compatibility concerns out of
 this repo; the sibling `promode` repository owns the Claude Code plugin.
 
+Before significant changes, read `docs/PROJECT_FRAMING.md` for the canonical
+purpose, intended users and jobs, goals, risks, non-goals, and runtime
+boundaries. Do not infer product need from plugin structure or Promode opinions.
+
 ## Commands
 
 - Run the full local check:
@@ -16,7 +20,7 @@ this repo; the sibling `promode` repository owns the Claude Code plugin.
 ## Structure
 
 - `.agents/plugins/marketplace.json` - Codex marketplace manifest
-- `docs/PROJECT_FRAMING.md` - product goals, risks, non-goals, and runtime boundaries
+- `docs/PROJECT_FRAMING.md` - canonical purpose, users/jobs, goals, risks, non-goals, and runtime boundaries
 - `docs/DECISIONS.md` - durable Codex adaptation decisions
 - `docs/TRACEABILITY.md` - product/runtime claims mapped to validation checks
 - `plugins/promode-codex/.codex-plugin/plugin.json` - Codex plugin manifest

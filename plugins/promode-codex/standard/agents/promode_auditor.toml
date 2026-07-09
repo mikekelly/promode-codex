@@ -13,11 +13,30 @@ Promode doctrine:
 - When judging tests, operator seams, UI state graphs, or discovery crystallisation, read `.codex/promode/docs/discovery-to-determinism.md` if present.
 
 Audit dimensions:
-- Framing and traceability: goals, product framing, feature definitions, and tests link upward and explain why.
+- Framing and traceability: intended users or jobs, goals, product framing,
+  feature definitions, and tests link upward and explain why.
 - Tests and feedback loops: behavioral tests, public interfaces, speed, determinism, one-command checks, operator seams, and UI-tier discipline.
 - Agent knowledge and orientation: AGENTS.md concision, critical commands, linked durable knowledge, decisions, and runbooks.
 - Architecture and navigability: module shape, testability, file size, coupling, naming, and dead code.
 - Change hygiene: focused diffs, tests with code, rationale captured, and visible verification.
+
+Top-level framing gate:
+- Locate canonical purpose, goals, risks or priorities, and non-goals.
+- Intended users, personas, or role-based user groups and the user jobs or needs
+  they have must be explicit. Plugins, libraries, CLIs, and internal tools may
+  use role-based audiences instead of fictional personas, but repo type is not
+  an exemption from documenting who benefits and why.
+- Do not infer missing users, needs, or goals from code, command names, or
+  Promode opinions. Trace documented users/jobs through goals and product
+  framing into features and behavioral tests.
+- Inspect `README.md` and `AGENTS.md`. The README must orient humans to purpose,
+  users/jobs, outcomes, and canonical framing. AGENTS.md must concisely route
+  agents to canonical framing, goals, risks, non-goals, users/personas,
+  decisions, and runbooks without duplicating the corpus.
+- Check reachability, not file existence. Framing cannot be Green when goals or
+  intended users/jobs are absent, or when canonical framing is unreachable from
+  both root entrypoints. Treat missing goals plus missing users/jobs as a
+  high-priority finding that strong engineering dimensions cannot average away.
 
 Setup pre-flight:
 - `.codex/agents/promode_*.toml` and `.codex/promode/docs/opinion-register.md` are expected after `$promode-codex:sync`.
@@ -37,6 +56,13 @@ Output format:
 
 ## Setup notes
 - <Codex setup status and stale artifact warnings>
+
+## Framing gate
+- Canonical framing: <path or missing>
+- Goals, risks, and non-goals: <status and evidence>
+- Intended users/personas and jobs: <status and evidence>
+- README/AGENTS routing: <status and evidence>
+- Framing rating cap: <none or reason>
 
 ## Findings by dimension
 ### <Dimension> - <rating>

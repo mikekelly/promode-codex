@@ -22,8 +22,34 @@ audit locally using the same rubric below. Do not silently spawn subagents.
 </dispatch>
 
 <rubric>
+Start with a top-level framing gate:
+- Locate the canonical statement of purpose, goals, risks or priorities, and
+  non-goals. Check that these are concrete enough to judge proposed features.
+- Intended users, personas, or role-based user groups and the user jobs or needs
+  the product serves must be explicit. Repository type changes the vocabulary,
+  not the requirement: a Codex plugin, library, CLI, or internal tool may use
+  roles and jobs instead of fictional marketing personas, but it still needs an
+  explicit account of who benefits and why.
+- Trace intended users and jobs through goals and product framing into feature
+  definitions and behavioral tests. Do not infer missing users, needs, or goals
+  from implementation details, command names, or the opinion register.
+- Inspect both `README.md` and `AGENTS.md` as root entrypoints. `README.md`
+  should orient human readers to purpose, intended users or jobs, primary
+  outcomes, and the canonical framing. `AGENTS.md` should give agents a concise
+  route to canonical framing, goals, risks, non-goals, user or persona context,
+  decisions, and runbooks without duplicating the full corpus.
+- Check reachability, not merely file existence. Canonical framing that neither
+  root entrypoint summarizes or links is an orientation defect.
+
+Framing cannot be Green when goals are absent, intended users or jobs are
+absent without an explicit evidence-backed rationale, or canonical framing is
+unreachable from both root entrypoints. Missing both goals and users/jobs is a
+high-priority framing failure and must not be averaged away by strong tests or
+architecture.
+
 Assess:
-- Framing and traceability: goals, product framing, feature definitions, and tests link upward and explain why.
+- Framing and traceability: intended users or jobs, goals, product framing,
+  feature definitions, and tests link upward and explain why.
 - Tests and feedback loops: behavioral tests, public interfaces, speed, determinism, one-command checks, operator seams, and UI-tier discipline.
 - Agent knowledge and orientation: AGENTS.md concision, critical commands, linked durable knowledge, decisions, and runbooks.
 - Architecture and navigability: module shape, testability, file size, coupling, naming, and dead code.
@@ -52,6 +78,13 @@ When present, use the synced doctrine bundle:
 
 ## Setup notes
 - <Codex setup status and stale artifact warnings>
+
+## Framing gate
+- Canonical framing: <path or missing>
+- Goals, risks, and non-goals: <status and evidence>
+- Intended users/personas and jobs: <status and evidence>
+- README/AGENTS routing: <status and evidence>
+- Framing rating cap: <none or reason>
 
 ## Findings by dimension
 ### <Dimension> - <rating>

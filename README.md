@@ -6,6 +6,14 @@ methodology to Codex's plugin, skill, and subagent runtime.
 This is intentionally a separate plugin from the Claude Code version. The
 methodology is shared; the runtime contract is not.
 
+## Who It Is For
+
+Promode for Codex serves project leads who want the main Codex agent to enforce
+an evidence-backed development process, contributors who need predictable
+project-scoped agents and doctrine, and maintainers adapting Promode to Codex's
+runtime. The canonical [project framing](docs/PROJECT_FRAMING.md) defines these
+role-based users and jobs, product goals, risks, and non-goals.
+
 ## What It Provides
 
 - A Codex marketplace manifest at `.agents/plugins/marketplace.json`

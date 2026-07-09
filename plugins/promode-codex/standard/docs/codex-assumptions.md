@@ -62,11 +62,19 @@ Optional settings can use normal Codex config keys such as `sandbox_mode`,
 Subagents inherit parent runtime settings. Custom agents are config layers, not
 hard security boundaries.
 
-Promode model tiering is advisory for the main session and explicit for copied
-custom agents where Codex exposes stable model IDs. The main orchestrating agent
-and `promode_chief_technology_officer` should run on GPT-5.6 Sol
-(`gpt-5.6-sol`) with high reasoning effort when available. Other specialist
-agents use `gpt-5.5`, while `promode_fast_worker` uses `gpt-5.4-mini`.
+Promode requires GPT-5.6 Sol (`gpt-5.6-sol`) with high reasoning effort for the
+main orchestrating agent when the Codex surface makes it available. An activated
+skill cannot switch the running main model or assume that exact model identity
+is exposed to the agent. The main brief therefore states the requirement,
+verifies it only when runtime metadata supports that check, and otherwise reports
+the tier as unverified instead of claiming Sol is enabled.
+
+Copied custom agents can select stable model IDs explicitly. The
+`promode_chief_technology_officer` uses GPT-5.6 Sol with high reasoning for
+bounded hard-to-reverse decisions. Other specialist agents use `gpt-5.5`, while
+`promode_fast_worker` uses `gpt-5.4-mini`. Sol context is reserved for coherence,
+synthesis, reversibility, and final judgment; operational work normally belongs
+on the cheaper tiers.
 
 After project custom agents are installed or refreshed, the already-running
 Codex session may not expose those new role names immediately. Tell users to

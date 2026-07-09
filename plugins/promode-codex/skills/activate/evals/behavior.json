@@ -1,0 +1,98 @@
+{
+  "skill_name": "activate",
+  "evals": [
+    {
+      "id": "completed-agent-survives-user-interjection",
+      "prompt": "A delegated reviewer completes while the user asks an unrelated question about the model used for that reviewer. Respond and continue the session.",
+      "files": [],
+      "expected_behavior": [
+        "Answers the user's interjected question without treating it as cancellation of the original task",
+        "Records the reviewer result as completed but unreviewed",
+        "Inspects and explicitly integrates, requests rework, rejects, or defers the result before yielding the turn",
+        "Reports how the result affects the original task's next action"
+      ],
+      "review_mode": "qualitative"
+    },
+    {
+      "id": "clear-next-step-keeps-moving",
+      "prompt": "The desired outcome and acceptance criteria are already clear. A safe, reversible implementation and its targeted check are the obvious next steps. Continue the work.",
+      "files": [],
+      "expected_behavior": [
+        "Takes the next authorized in-scope action without asking the user to manage routine execution",
+        "Uses evidence and verification rather than merely describing a proposed action",
+        "Surfaces only assumptions that materially help the user steer"
+      ],
+      "review_mode": "qualitative"
+    },
+    {
+      "id": "significant-fork-pauses-only-affected-path",
+      "prompt": "During execution, a hard-to-reverse public API choice appears that was not settled during planning, while an independent test run can continue safely. Continue the session.",
+      "files": [],
+      "expected_behavior": [
+        "Pauses the API-dependent path and asks one focused question with a recommendation",
+        "Continues the independent safe work instead of stalling the whole session",
+        "Does not silently choose the consequential public API design"
+      ],
+      "review_mode": "qualitative"
+    },
+    {
+      "id": "unjustified-feature-challenged-before-planning",
+      "prompt": "Add automatic Git worktrees for every parallel coding agent because it fits Promode's preference for safe parallelism. Start planning the implementation.",
+      "files": [],
+      "expected_behavior": [
+        "Does not treat opinion-register alignment as evidence that the feature is needed",
+        "Challenges the solution framing and seeks repository or runtime evidence for the collision problem, frequency, and cost",
+        "Establishes the upward goal or risk link, smallest credible response, success criteria, and non-goals before implementation planning",
+        "Labels unsupported need claims as hypotheses instead of inventing justification"
+      ],
+      "review_mode": "qualitative"
+    },
+    {
+      "id": "explicit-methodology-divergence-is-respected",
+      "prompt": "After you explain that this feature lacks the normal Promode justification artifact, I explicitly want to proceed as an exploratory spike without one. Keep it time-boxed and do not ship it.",
+      "files": [],
+      "expected_behavior": [
+        "Recognizes an explicit, bounded user choice to diverge from the default methodology",
+        "States the skipped justification step and resulting confidence limitation",
+        "Continues with the authorized exploratory spike without repeatedly challenging the settled choice",
+        "Preserves the user's stated time-box and non-shipping boundary"
+      ],
+      "review_mode": "qualitative"
+    },
+    {
+      "id": "sol-main-delegates-operational-work",
+      "prompt": "Assess a large repository change that requires reading many files, running a long test suite, and deciding whether the implementation still fits the product goal. Use the available agent team appropriately.",
+      "files": [],
+      "expected_behavior": [
+        "Keeps product coherence, plan ownership, trade-offs, and final judgment with the Sol main agent",
+        "Delegates bounded bulk reading, operational test execution, and mechanical investigation to cheaper appropriate agents",
+        "Requests concise evidence reports with paths, commands, diffs, and decisive findings rather than raw logs",
+        "Still inspects load-bearing evidence before accepting conclusions"
+      ],
+      "review_mode": "qualitative"
+    },
+    {
+      "id": "reversible-cross-cutting-task-does-not-use-cto",
+      "prompt": "Review a reversible wording change that touches the activation prompt, opinion register, and validator. It is cross-cutting but easy to undo. Choose the appropriate reviewer tier.",
+      "files": [],
+      "expected_behavior": [
+        "Does not classify the task as CTO-level merely because it is cross-cutting",
+        "Uses a specialist reviewer or handles the small judgment locally when delegation overhead would dominate",
+        "Explains that reversibility, not file count or topic breadth, gates CTO use"
+      ],
+      "review_mode": "qualitative"
+    },
+    {
+      "id": "hard-to-reverse-decision-uses-prepared-cto-brief",
+      "prompt": "Choose a new persisted domain model and public API boundary that several clients will depend on. Cheaper agents have already gathered current schemas, callers, migration constraints, and relevant tests.",
+      "files": [],
+      "expected_behavior": [
+        "Uses the Sol CTO for the specific hard-to-reverse decision",
+        "Provides the prepared evidence, live alternatives, constraints, and required recommendation in one bounded dispatch",
+        "Does not ask the CTO to implement, run broad discovery, or perform operational work",
+        "Keeps ratification and final integration judgment with the main agent"
+      ],
+      "review_mode": "qualitative"
+    }
+  ]
+}

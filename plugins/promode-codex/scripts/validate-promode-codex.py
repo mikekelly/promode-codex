@@ -40,11 +40,17 @@ AGENT_CONTRACT_PHRASES = {
         "Promode methodology audits for Codex",
         "Setup pre-flight",
         "Prioritised action plan",
+        "Intended users, personas, or role-based user groups",
+        "Framing cannot be Green",
+        "README.md",
+        "AGENTS.md",
     ],
     "promode_chief_technology_officer": [
         "hard-to-reverse architecture",
         "GPT-5.6 Sol",
         "high reasoning",
+        "Sol context is scarce",
+        "Cross-cutting scope alone",
         "do not make code changes",
         "Delegation-ready task breakdown",
     ],
@@ -249,10 +255,12 @@ def validate_marketplace(source_root: Path) -> None:
 
 def validate_activation_flow() -> None:
     activate = ROOT / "skills" / "activate" / "SKILL.md"
+    activate_evals = ROOT / "skills" / "activate" / "evals" / "behavior.json"
     activate_metadata = ROOT / "skills" / "activate" / "agents" / "openai.yaml"
     sync = ROOT / "skills" / "sync" / "SKILL.md"
     sync_metadata = ROOT / "skills" / "sync" / "agents" / "openai.yaml"
     check_file(activate)
+    check_file(activate_evals)
     check_file(activate_metadata)
     check_file(sync)
     check_file(sync_metadata)
@@ -267,6 +275,9 @@ def validate_activation_flow() -> None:
         "<role>",
         "<codex-runtime-contract>",
         "<promode-doctrine>",
+        "<methodology-enforcement>",
+        "<initiative-and-continuity>",
+        "<sol-context-economy>",
         "<delegation-map>",
         "<activation-scope>",
         ".codex/promode/docs/opinion-register.md",
@@ -293,6 +304,23 @@ def validate_activation_flow() -> None:
         "Protect the main-agent context",
         "Default to planning for delegation on non-trivial tasks",
         "Aggressively split independent sidecar tasks",
+        "in charge of the process",
+        "default operating contract",
+        "explicitly chooses to diverge",
+        "Justification precedes planning",
+        "Opinion alignment constrains the solution",
+        "required main-session tier",
+        "coherence and final-judgment tier",
+        "Keep the judgment critical path local",
+        "Cross-cutting scope alone",
+        "delegation overhead",
+        "next in-scope action is clear",
+        "non-blocking steering questions",
+        "Completion reconciliation is mandatory",
+        "completed-unreviewed",
+        "choose one disposition",
+        "request rework",
+        "explicitly defer",
     ):
         if needle not in activate_text:
             fail(f"activate skill missing mirrored Promode surface: {needle}")
@@ -304,6 +332,21 @@ def validate_activation_flow() -> None:
     ):
         if stale in activate_text:
             fail(f"activate skill contains stale surface: {stale}")
+
+    eval_payload = json.loads(activate_evals.read_text(encoding="utf-8"))
+    eval_ids = {item.get("id") for item in eval_payload.get("evals", [])}
+    expected_eval_ids = {
+        "completed-agent-survives-user-interjection",
+        "clear-next-step-keeps-moving",
+        "significant-fork-pauses-only-affected-path",
+        "unjustified-feature-challenged-before-planning",
+        "explicit-methodology-divergence-is-respected",
+        "sol-main-delegates-operational-work",
+        "reversible-cross-cutting-task-does-not-use-cto",
+        "hard-to-reverse-decision-uses-prepared-cto-brief",
+    }
+    if not expected_eval_ids.issubset(eval_ids):
+        fail("activate skill missing required orchestration behavior evals")
 
     for path in (activate_metadata, sync_metadata):
         metadata_text = path.read_text(encoding="utf-8")
@@ -340,6 +383,14 @@ def validate_doctrine_bundle() -> None:
         "operator-seam-bulk-below-ui",
         "sync-skill",
         "main-context-for-orchestration",
+        "initiative-keeps-flow-moving",
+        "completion-is-a-state-transition",
+        "methodology-is-the-enforced-default",
+        "opinion-alignment-is-not-justification",
+        "sol-is-the-coherence-tier",
+        "cto-use-is-gated-by-reversibility",
+        "users-and-jobs-anchor-features",
+        "root-entrypoints-route-to-framing",
         ".codex/promode/docs/opinion-register.md",
     ):
         if needle not in register:
@@ -369,6 +420,8 @@ def validate_doctrine_bundle() -> None:
         "Upgrade awareness",
         "gpt-5.6-sol",
         "high reasoning effort",
+        "cannot switch the running main model",
+        "Sol context",
         "gpt-5.5",
         "gpt-5.4-mini",
     ):
@@ -565,6 +618,24 @@ def validate_repository_policy(source_root: Path) -> None:
     ):
         check_file(path)
 
+    framing_text = (source_root / "docs" / "PROJECT_FRAMING.md").read_text(
+        encoding="utf-8"
+    )
+    for needle in (
+        "## Intended Users And Jobs",
+        "Codex project lead",
+        "Promode for Codex maintainer",
+    ):
+        if needle not in framing_text:
+            fail(f"project framing missing user/job grounding: {needle}")
+
+    readme = source_root / "README.md"
+    check_file(readme)
+    readme_text = readme.read_text(encoding="utf-8")
+    for needle in ("## Who It Is For", "docs/PROJECT_FRAMING.md"):
+        if needle not in readme_text:
+            fail(f"README.md missing product orientation: {needle}")
+
     gitignore = source_root / ".gitignore"
     check_file(gitignore)
     gitignore_text = gitignore.read_text(encoding="utf-8")
@@ -581,6 +652,7 @@ def validate_repository_policy(source_root: Path) -> None:
         "docs/PROJECT_FRAMING.md",
         "docs/DECISIONS.md",
         "docs/TRACEABILITY.md",
+        "intended users and jobs",
         "standard/docs/",
         "Do not generalize that to user projects",
     ):
@@ -788,6 +860,34 @@ def validate_skills() -> None:
     extra = seen - REQUIRED_SKILLS
     if extra:
         fail(f"unexpected exposed skills: {sorted(extra)}")
+
+    audit_skill = skills_root / "promode-audit" / "SKILL.md"
+    audit_text = audit_skill.read_text(encoding="utf-8")
+    for phrase in (
+        "Intended users, personas, or role-based user groups",
+        "user jobs or needs",
+        "Framing cannot be Green",
+        "Do not infer missing users",
+        "README.md",
+        "AGENTS.md",
+        "canonical framing",
+    ):
+        if phrase not in audit_text:
+            fail(f"promode-audit skill missing framing contract: {phrase}")
+
+    audit_evals = skills_root / "promode-audit" / "evals" / "behavior.json"
+    check_file(audit_evals)
+    audit_eval_payload = json.loads(audit_evals.read_text(encoding="utf-8"))
+    audit_eval_ids = {
+        item.get("id") for item in audit_eval_payload.get("evals", [])
+    }
+    expected_audit_eval_ids = {
+        "codex-plugin-missing-user-jobs",
+        "framing-exists-but-entrypoints-do-not-route",
+        "role-based-users-accepted-without-fictional-personas",
+    }
+    if not expected_audit_eval_ids.issubset(audit_eval_ids):
+        fail("promode-audit skill missing framing behavior evals")
 
 
 def skill_frontmatter_name(frontmatter: str) -> str:

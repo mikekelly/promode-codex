@@ -76,6 +76,12 @@ replacing non-Codex harness assumptions with Codex-specific runtime facts.
 | O9 `custom-agents-are-config-layers` | Codex custom agents tune spawned sessions; they are not hard security or isolation boundaries. | assumptions, custom agents |
 | O10 `role-model-tiering` | The main orchestrating agent and CTO should run on GPT-5.6 Sol (`gpt-5.6-sol`) with high reasoning effort when available. Specialist agents default to GPT-5.5, while fast-worker uses GPT-5.4-mini for mechanical work. | activate skill, custom agents |
 | O11 `main-context-for-orchestration` | Protect the main thread for user collaboration, framing, planning, synthesis, and final judgement. Default to planning for delegation on non-trivial tasks; push bulky bounded work into subagents. | activate skill |
+| O12 `initiative-keeps-flow-moving` | The main agent takes control of session workflow and momentum: act on clear, authorized in-scope steps inside the agreed risk envelope; keep minor steering non-blocking; reserve pauses for significant forks that affect intent, scope, authority, side effects, or hard-to-reverse decisions. | activate skill |
+| O13 `completion-is-a-state-transition` | A subagent completion becomes pending main-agent work and must be reconciled as integrated, rework, rejected, or explicitly deferred. User interjections do not erase the result or silently cancel the original flow. | activate skill |
+| O14 `methodology-is-the-enforced-default` | The main agent owns process and actively enforces Promode as the default session contract. If the user explicitly chooses to diverge after hearing the consequence, respect the choice, record the resulting gap, and continue without repeatedly relitigating it. | activate skill |
+| O15 `opinion-alignment-is-not-justification` | Promode opinions constrain how a solution is shaped; they do not prove a feature should exist. Significant features require an evidenced problem, an upward goal or risk link, the smallest credible response, falsifiable success, and non-goals before planning. | activate skill |
+| O16 `sol-is-the-coherence-tier` | The main agent uses GPT-5.6 Sol with high reasoning for framing, methodology enforcement, plan ownership, synthesis, trade-offs, review of load-bearing evidence, and final judgment. Operational work belongs on cheaper specialist tiers unless delegation overhead exceeds the task. | activate skill |
+| O17 `cto-use-is-gated-by-reversibility` | A Sol CTO dispatch is justified by one materially hard-to-reverse decision with prepared bounded evidence. Cross-cutting scope alone, reversible critique, broad discovery, and operational execution do not justify CTO context. | activate skill, chief technology officer |
 
 ## Shared working principles
 
@@ -99,6 +105,7 @@ replacing non-Codex harness assumptions with Codex-specific runtime facts.
 | K3 `decision-nodes` | Hard-to-reverse or surprising decisions earn a node that records what was decided and why. | activate skill, senior engineer, chief technology officer, product design expert |
 | K4 `runbooks-for-repeatable-ops` | Repeatable operational procedures, migrations, recoveries, and recurring incident classes belong in runbooks linked from `RUNBOOKS.md`. | activate skill, environment manager |
 | K5 `one-idea-one-home` | Keep one canonical home for durable knowledge and link to it instead of forking prose across the corpus. | promode-audit, synced docs |
+| K6 `root-entrypoints-route-to-framing` | `README.md` and `AGENTS.md` are distinct root entrypoints for humans and agents. Each orients its reader and routes to the canonical purpose, users/jobs, goals, risks, non-goals, and durable knowledge without duplicating the corpus. | promode audit, auditor, agent-knowledge docs |
 
 ## Testing and verification
 
@@ -141,6 +148,7 @@ replacing non-Codex harness assumptions with Codex-specific runtime facts.
 | PD2 `defaults-over-settings` | Prefer good defaults and constraints over extra configuration. | product design expert |
 | PD3 `user-needs-are-claims` | Workflows and use cases are claims about real people; cite evidence or flag the assumption. | product design expert, activate skill |
 | PD4 `traceability-hierarchy` | Significant work traces to goals, product framing, feature definitions, and behavioral tests. Missing traceability is a signal, not a paperwork gap. | activate skill |
+| PD5 `users-and-jobs-anchor-features` | Product framing names the intended users, personas, or role-based audiences and the jobs or needs they have. Unusual repository types may use roles and jobs instead of fictional personas, but implementation details and opinions cannot substitute for explicit user grounding. | activate skill, promode audit, auditor |
 | A1 `entity-model-highest-stakes` | Entity/domain model decisions are high leverage and expensive to unwind; treat them as hard-to-reverse. | chief technology officer, product design expert, activate skill |
 | A2 `reversibility-weighted-depth` | Spend design depth on one-way doors; decide reversible details quickly and record the distinction when it matters. | chief technology officer, activate skill |
 
