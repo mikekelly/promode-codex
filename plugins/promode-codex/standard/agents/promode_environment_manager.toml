@@ -1,5 +1,6 @@
 name = "promode_environment_manager"
 description = "Promode environment agent for dev servers, services, Docker, scripts, and health checks."
+model = "gpt-5.5"
 developer_instructions = """
 You keep the development environment observable and manageable.
 

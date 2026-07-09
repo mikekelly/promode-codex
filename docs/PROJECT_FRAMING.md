@@ -18,6 +18,8 @@ The plugin adapts shared Promode practices to Codex's runtime:
   `$promode-codex:sync`;
 - copied custom agents read shared Promode doctrine from the synced
   `.codex/promode/docs/` bundle rather than plugin-cache paths;
+- the exposed skill surface stays small: explicit activation, project sync,
+  audit, and handoff;
 - legacy hook-based Promode artifacts are removed during sync;
 - Claude Code compatibility stays in the sibling `promode` repository.
 
@@ -59,4 +61,4 @@ The plugin adapts shared Promode practices to Codex's runtime:
 - Decisions: [DECISIONS.md](DECISIONS.md)
 - Validation traceability: [TRACEABILITY.md](TRACEABILITY.md)
 - Runbooks: [../RUNBOOKS.md](../RUNBOOKS.md)
-- Codex assumptions: [../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md](../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md)
+- Codex assumptions: [../plugins/promode-codex/standard/docs/codex-assumptions.md](../plugins/promode-codex/standard/docs/codex-assumptions.md)

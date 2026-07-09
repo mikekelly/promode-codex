@@ -23,7 +23,7 @@ this repo; the sibling `promode` repository owns the Claude Code plugin.
 - `plugins/promode-codex/skills/activate/SKILL.md` - main-session Promode brief loaded by `$promode-codex:activate`
 - `plugins/promode-codex/standard/agents/` - project-scoped Codex custom-agent templates
 - `plugins/promode-codex/standard/docs/` - project-local Promode doctrine templates synced into `.codex/promode/docs/`
-- `plugins/promode-codex/skills/` - bundled Codex skills
+- `plugins/promode-codex/skills/` - bundled Codex skills; exposed surface is `activate`, `sync`, `promode-audit`, and `handoff`
 - `plugins/promode-codex/scripts/` - local validation and install helpers
 - `RUNBOOKS.md` and `runbooks/` - repeatable maintenance procedures
 
@@ -35,7 +35,9 @@ this repo; the sibling `promode` repository owns the Claude Code plugin.
 - `$promode-codex:sync` syncs project custom agents into `.codex/agents/`,
   syncs Promode doctrine into `.codex/promode/docs/`, and removes legacy
   Promode hook artifacts from older installs.
-- Project custom agents are installed into `.codex/agents/`.
+- Project custom agents are installed into `.codex/agents/`. Promode owns
+  `.codex/agents/promode_*.toml` during sync; non-Promode agents must be
+  preserved.
 - In this marketplace checkout only, root `/.codex/` is generated local setup
   state and is ignored. Do not generalize that to user projects where `.codex/`
   may contain project-owned hooks, agents, and config.

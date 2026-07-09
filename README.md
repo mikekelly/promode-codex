@@ -14,8 +14,7 @@ methodology is shared; the runtime contract is not.
   current session
 - `$promode-codex:sync` to sync project-scoped custom agents and remove
   legacy hook-based Promode artifacts
-- Codex skills for setup, audits, handoff, subagent recovery, and
-  discovery-to-determinism testing strategy
+- Command-equivalent Codex skills for audits and handoff
 - Project-scoped custom-agent templates under `plugins/promode-codex/standard/agents/`
 - Project-local Promode doctrine templates under `plugins/promode-codex/standard/docs/`
 - Validation scripts that check activation/sync behavior and custom-agent TOML
@@ -33,11 +32,20 @@ Promode for Codex differs from the Claude Code plugin in important ways:
 - Copied project custom agents read shared Promode doctrine from
   `.codex/promode/docs/opinion-register.md`; they do not reference versioned
   plugin-cache paths.
+- The exposed skill surface is deliberately small: `activate`, `sync`,
+  `promode-audit`, and `handoff`. Larger methodology mechanics such as
+  discovery-to-determinism live in synced docs and role prompts, matching the
+  current Claude Promode shape more closely.
 - Codex subagents inherit parent runtime settings and are config layers, not
   separate hard-permission boundaries.
 - Codex transcript paths are convenience fields, not stable APIs.
-- Delegation is consent-first. Promode should not silently spawn subagents when
-  the user did not ask for Promode, delegation, or parallel agent work.
+- Activation authorizes Promode's methodology for the session, including
+  routine methodology-aligned delegation. Promode still asks before unusual
+  cost, permission changes, external services, separate workspaces, or anything
+  that conflicts with the user's stated preference.
+- Model tiering follows role responsibility: the main orchestrator and CTO
+  should run on GPT-5.5 for now; specialist agents are pinned to `gpt-5.5`,
+  with `promode_fast_worker` pinned to `gpt-5.4-mini`.
 
 ## Install From GitHub
 
@@ -96,11 +104,12 @@ $promode-codex:sync
 $promode-codex:activate
 ```
 
-`$promode-codex:sync` installs or refreshes project-scoped Promode agents in
-`.codex/agents/` and removes legacy Promode hook artifacts left by older
-installs. It also mirrors Promode doctrine into `.codex/promode/docs/` so copied
-agents can read the project-local opinion register. It preserves non-Promode
-agents and non-Promode hooks. After a successful sync, it performs a
+`$promode-codex:sync` installs or refreshes the eleven project-scoped Promode
+agents in `.codex/agents/` and removes legacy Promode hook artifacts left by
+older installs. It also mirrors Promode doctrine into `.codex/promode/docs/` so
+copied agents can read the project-local opinion register. It prunes stale
+Promode-owned `.codex/agents/promode_*.toml` files while preserving
+non-Promode agents and non-Promode hooks. After a successful sync, it performs a
 best-effort GitHub version check and warns if the installed plugin copy is older
 than the latest available Promode for Codex version.
 
@@ -182,5 +191,5 @@ This repo is tuned against current Codex docs for:
 - Skills: https://developers.openai.com/codex/skills
 - Subagents: https://developers.openai.com/codex/subagents
 
-See `plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md`
+See `plugins/promode-codex/standard/docs/codex-assumptions.md`
 for the exact assumptions captured in the plugin.

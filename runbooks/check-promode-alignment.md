@@ -43,14 +43,19 @@ has moved files.
 | Shared concern | Claude Promode | Promode for Codex |
 | --- | --- | --- |
 | Main-agent methodology | `plugins/promode/PROMODE_MAIN_AGENT.md` | `plugins/promode-codex/skills/activate/SKILL.md` |
-| Implementer | `plugins/promode/agents/implementer.md` | `plugins/promode-codex/standard/agents/promode_implementer.toml` |
-| Reviewer | `plugins/promode/agents/code-reviewer.md` | `plugins/promode-codex/standard/agents/promode_reviewer.toml` |
-| Debugger | `plugins/promode/agents/debugger.md` | `plugins/promode-codex/standard/agents/promode_debugger.toml` |
-| Verifier | `plugins/promode/agents/verifier.md` | `plugins/promode-codex/standard/agents/promode_verifier.toml` |
-| Environment manager | `plugins/promode/agents/environment-manager.md` | `plugins/promode-codex/standard/agents/promode_environment_manager.toml` |
-| Product designer | `plugins/promode/agents/product-design-expert.md` | `plugins/promode-codex/standard/agents/promode_product_designer.toml` |
 | Agent analyzer | `plugins/promode/agents/agent-analyzer.md` | `plugins/promode-codex/standard/agents/promode_agent_analyzer.toml` |
-| Shared skills | `plugins/promode/skills/` | `plugins/promode-codex/skills/` |
+| Auditor | `plugins/promode/agents/auditor.md` | `plugins/promode-codex/standard/agents/promode_auditor.toml` |
+| Chief technology officer | `plugins/promode/agents/chief-technology-officer.md` | `plugins/promode-codex/standard/agents/promode_chief_technology_officer.toml` |
+| Code reviewer | `plugins/promode/agents/code-reviewer.md` | `plugins/promode-codex/standard/agents/promode_code_reviewer.toml` |
+| Constraint reinforcer | `plugins/promode/agents/constraint-reinforcer.md` | `plugins/promode-codex/standard/agents/promode_constraint_reinforcer.toml` |
+| Debugger | `plugins/promode/agents/debugger.md` | `plugins/promode-codex/standard/agents/promode_debugger.toml` |
+| Environment manager | `plugins/promode/agents/environment-manager.md` | `plugins/promode-codex/standard/agents/promode_environment_manager.toml` |
+| Fast worker | `plugins/promode/agents/fast-worker.md` | `plugins/promode-codex/standard/agents/promode_fast_worker.toml` |
+| Product design expert | `plugins/promode/agents/product-design-expert.md` | `plugins/promode-codex/standard/agents/promode_product_design_expert.toml` |
+| Senior engineer | `plugins/promode/agents/senior-engineer.md` | `plugins/promode-codex/standard/agents/promode_senior_engineer.toml` |
+| Verifier | `plugins/promode/agents/verifier.md` | `plugins/promode-codex/standard/agents/promode_verifier.toml` |
+| Command-equivalent skills | `plugins/promode/commands/` | `plugins/promode-codex/skills/handoff/`, `plugins/promode-codex/skills/promode-audit/` |
+| Methodology docs | `plugins/promode/docs/` | `plugins/promode-codex/standard/docs/` |
 | Activation/sync | `plugins/promode/hooks/`, `plugins/promode/docs/opinion-register.md` | `skills/activate/`, `skills/sync/`, `standard/docs/`, and `scripts/install-project-agents.py` |
 | Validation | `scripts/check-*.sh` | `plugins/promode-codex/scripts/validate-promode-codex.py` and plugin validator |
 | Runbooks | `RUNBOOKS.md`, `runbooks/` | `RUNBOOKS.md`, `runbooks/` |
@@ -62,8 +67,10 @@ has moved files.
    ```bash
    find "$CLAUDE_REPO/plugins/promode/agents" -maxdepth 1 -type f | sort
    find "$CODEX_PLUGIN_ROOT/standard/agents" -maxdepth 1 -type f | sort
-   find "$CLAUDE_REPO/plugins/promode/skills" -maxdepth 2 -type f | sort
+   find "$CLAUDE_REPO/plugins/promode/commands" -maxdepth 1 -type f | sort
+   find "$CLAUDE_REPO/plugins/promode/docs" -maxdepth 1 -type f | sort
    find "$CODEX_PLUGIN_ROOT/skills" -maxdepth 2 -type f | sort
+   find "$CODEX_PLUGIN_ROOT/standard/docs" -maxdepth 1 -type f | sort
    find "$CLAUDE_REPO/runbooks" -maxdepth 1 -type f | sort
    find "$CODEX_REPO/runbooks" -maxdepth 1 -type f | sort
    ```
@@ -95,18 +102,16 @@ has moved files.
 
 4. **Compare skills.**
 
-   Shared skills should carry the same methodology unless Codex needs a runtime
-   adaptation. Compare at least:
+   Claude Promode no longer exposes voluntary skills. Codex should expose only
+   structural delivery skills plus command-equivalent skills. Compare at least:
 
-   - `discovery-to-determinism`
    - `handoff`
    - `promode-audit`
-   - `recovering-subagents`
 
-   Codex-only skills such as `managing-promode-codex` should be checked against
-   Codex docs and local harness behavior, not against Claude plugin mechanics.
-   Claude-only skills should be assessed explicitly: either port them, record
-   why they are not applicable, or add a Codex-native equivalent.
+   `discovery-to-determinism` should live under `standard/docs/` and be routed
+   by agent prompts, not exposed as a skill. Subagent recovery should live in
+   `promode_agent_analyzer`, not as an exposed skill. Codex-only structural
+   skills are `activate` and `sync`.
 
 5. **Compare delivery and install behavior by intent.**
 
@@ -134,7 +139,7 @@ has moved files.
 
    - `plugins/promode-codex/skills/activate/SKILL.md`
    - relevant `plugins/promode-codex/standard/agents/promode_*.toml`
-   - relevant `plugins/promode-codex/skills/*`
+   - command-equivalent or structural `plugins/promode-codex/skills/*`
    - `README.md`, `AGENTS.md`, or runbooks if behavior changed
    - validation scripts when the invariant should be enforced
 
@@ -186,5 +191,5 @@ Sources:
 ## See also
 
 - Hub: [`../RUNBOOKS.md`](../RUNBOOKS.md)
-- Codex assumptions: [`../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md`](../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md)
+- Codex assumptions: [`../plugins/promode-codex/standard/docs/codex-assumptions.md`](../plugins/promode-codex/standard/docs/codex-assumptions.md)
 - Promode audit skill: [`../plugins/promode-codex/skills/promode-audit/SKILL.md`](../plugins/promode-codex/skills/promode-audit/SKILL.md)

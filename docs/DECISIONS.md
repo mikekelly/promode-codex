@@ -34,7 +34,7 @@ visible to the user.
 Evidence:
 
 - [../plugins/promode-codex/skills/activate/SKILL.md](../plugins/promode-codex/skills/activate/SKILL.md)
-- [../plugins/promode-codex/skills/promode-audit/references/main-agent-delivery.md](../plugins/promode-codex/skills/promode-audit/references/main-agent-delivery.md)
+- [../plugins/promode-codex/standard/docs/main-agent-delivery.md](../plugins/promode-codex/standard/docs/main-agent-delivery.md)
 
 ## D3. Use Sync Skill For Project Agent Sync
 
@@ -50,7 +50,7 @@ stable project-local doctrine path rather than a versioned plugin-cache path.
 
 Evidence:
 
-- [../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md](../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md)
+- [../plugins/promode-codex/standard/docs/codex-assumptions.md](../plugins/promode-codex/standard/docs/codex-assumptions.md)
 - [../plugins/promode-codex/skills/sync/SKILL.md](../plugins/promode-codex/skills/sync/SKILL.md)
 - [../plugins/promode-codex/scripts/install-project-agents.py](../plugins/promode-codex/scripts/install-project-agents.py)
 - [../plugins/promode-codex/standard/docs/opinion-register.md](../plugins/promode-codex/standard/docs/opinion-register.md)
@@ -67,7 +67,7 @@ role names until the project custom-agent inventory is reloaded.
 Evidence:
 
 - [../plugins/promode-codex/scripts/install-project-agents.py](../plugins/promode-codex/scripts/install-project-agents.py)
-- [../plugins/promode-codex/skills/managing-promode-codex/workflows/sync.md](../plugins/promode-codex/skills/managing-promode-codex/workflows/sync.md)
+- [../plugins/promode-codex/skills/sync/SKILL.md](../plugins/promode-codex/skills/sync/SKILL.md)
 
 ## D5. Warn About Stale Plugin Copies, Do Not Self-Upgrade
 
@@ -112,5 +112,27 @@ accepts best-effort behavior.
 
 Evidence:
 
-- [../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md](../plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md)
-- [../plugins/promode-codex/skills/recovering-subagents/SKILL.md](../plugins/promode-codex/skills/recovering-subagents/SKILL.md)
+- [../plugins/promode-codex/standard/docs/codex-assumptions.md](../plugins/promode-codex/standard/docs/codex-assumptions.md)
+- [../plugins/promode-codex/standard/agents/promode_agent_analyzer.toml](../plugins/promode-codex/standard/agents/promode_agent_analyzer.toml)
+
+## D8. Mirror Claude Promode Surface Without Re-Exposing Methodology As Skills
+
+Decision: the Codex plugin exposes only four user-facing skills:
+`activate`, `sync`, `promode-audit`, and `handoff`. `activate` and `sync` are
+Codex delivery mechanics. `promode-audit` and `handoff` mirror Claude Promode
+slash-command surfaces. Other Promode mechanics are delivered through
+project-scoped custom-agent prompts and synced doctrine docs.
+
+Why: current Claude Promode moved away from voluntary skill invocation. Keeping
+methodology such as discovery-to-determinism and subagent recovery as exposed
+Codex skills made the Codex port look broader than Claude and put mechanics in
+the wrong user-invoked surface. Codex still needs structural skills for
+activation and sync because plugins can package skills but not directly install
+project custom-agent files.
+
+Evidence:
+
+- [../plugins/promode-codex/skills](../plugins/promode-codex/skills)
+- [../plugins/promode-codex/standard/agents](../plugins/promode-codex/standard/agents)
+- [../plugins/promode-codex/standard/docs/discovery-to-determinism.md](../plugins/promode-codex/standard/docs/discovery-to-determinism.md)
+- [../plugins/promode-codex/scripts/validate-promode-codex.py](../plugins/promode-codex/scripts/validate-promode-codex.py)

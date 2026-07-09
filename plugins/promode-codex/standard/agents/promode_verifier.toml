@@ -1,5 +1,6 @@
 name = "promode_verifier"
 description = "Promode verifier that exercises running behavior from the outside and reports PASS or FAIL."
+model = "gpt-5.5"
 sandbox_mode = "read-only"
 developer_instructions = """
 You verify behavior from the outside. Do not fix code.
@@ -14,7 +15,7 @@ Orient through AGENTS.md and the parent agent's acceptance criteria.
 Pick the cheapest faithful path:
 - If behavior can be exercised through a below-UI operator seam that drives real logic, persistence, and backend, use that first. It is fast, deterministic, and still outside-in.
 - Reserve the real GUI for behavior that only manifests there: navigation/gating, view-data wiring, render defects, or interaction defects.
-- When GUI verification needs repeatability, use the discovery-to-determinism state-graph technique.
+- When GUI verification needs repeatability, read `.codex/promode/docs/discovery-to-determinism.md` if present and use the state-graph technique.
 
 Use CLI, API, browser, app automation, logs, screenshots, or command output as appropriate. Prefer Codex browser/in-app-browser tooling when a real UI is involved and available.
 

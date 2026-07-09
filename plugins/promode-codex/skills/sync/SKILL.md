@@ -14,7 +14,7 @@ Promode for Codex version.
 
 <required_reading>
 Read before acting:
-1. `../managing-promode-codex/references/codex-assumptions.md`
+1. `../../standard/docs/codex-assumptions.md`
 2. All files in `../../standard/agents/`
 3. `../../standard/docs/index.md`
 4. `../../standard/docs/opinion-register.md`
@@ -29,14 +29,15 @@ Read before acting:
    Use `--skip-upgrade-check` only for offline or deterministic validation
    runs.
 3. Preserve non-Promode files under `.codex/agents/` and `.codex/hooks.json`.
-   Treat `.codex/promode/docs/` as a Promode-owned generated doctrine mirror.
+   Treat `.codex/agents/promode_*.toml` and `.codex/promode/docs/` as
+   Promode-owned generated mirrors.
 4. Do not edit `AGENTS.md` unless the user explicitly asks.
 5. Do not install Promode main-session hooks. Promode is activated explicitly
    with `$promode-codex:activate` in each session.
 6. If the helper warns that a newer plugin is available, tell the user to run
    `codex plugin marketplace upgrade promode-codex` or upgrade all marketplaces,
    then restart or resume Codex.
-7. Verify all seven `.codex/agents/promode_*.toml` files exist and that
+7. Verify all eleven `.codex/agents/promode_*.toml` files exist and that
    `.codex/promode/docs/opinion-register.md` exists.
 8. Tell the user to restart or resume Codex so project custom-agent roles are
    reloaded, then run `$promode-codex:activate` in sessions where they want
@@ -44,7 +45,7 @@ Read before acting:
 </process>
 
 <success_criteria>
-The project has the seven Promode custom-agent files under `.codex/agents/`,
+The project has the eleven Promode custom-agent files under `.codex/agents/`,
 the Promode doctrine bundle under `.codex/promode/docs/`, legacy Promode hook
 artifacts are absent, non-Promode project files were preserved, stale plugin
 cache warnings are surfaced when detected, and the user knows the restart/resume

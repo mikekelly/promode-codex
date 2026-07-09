@@ -62,6 +62,12 @@ Optional settings can use normal Codex config keys such as `sandbox_mode`,
 Subagents inherit parent runtime settings. Custom agents are config layers, not
 hard security boundaries.
 
+Promode model tiering is advisory for the main session and explicit for copied
+custom agents where Codex exposes stable model IDs. The main orchestrating agent
+and `promode_chief_technology_officer` should run on GPT-5.5 for now. Other
+specialist agents use `gpt-5.5`, while `promode_fast_worker` uses
+`gpt-5.4-mini`.
+
 After project custom agents are installed or refreshed, the already-running
 Codex session may not expose those new role names immediately. Tell users to
 restart Codex, resume the project thread, or start a fresh session in the
@@ -92,7 +98,10 @@ current sync path removes these Promode-owned artifacts:
 - `.codex/hooks/promode-agent-drift.py`
 - Promode hook commands inside `.codex/hooks.json`
 
-Non-Promode hooks and non-Promode custom agents must be preserved.
+The sync helper treats `.codex/agents/promode_*.toml` as Promode-owned
+generated files. It copies the current bundled templates and prunes stale
+Promode-prefixed templates from older versions. Non-Promode hooks and
+non-Promode custom agents must be preserved.
 
 ## Upgrade awareness
 

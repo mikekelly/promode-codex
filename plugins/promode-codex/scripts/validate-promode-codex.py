@@ -17,19 +17,45 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 AGENTS = {
-    "promode_implementer",
-    "promode_reviewer",
-    "promode_debugger",
-    "promode_verifier",
-    "promode_environment_manager",
-    "promode_product_designer",
     "promode_agent_analyzer",
+    "promode_auditor",
+    "promode_chief_technology_officer",
+    "promode_code_reviewer",
+    "promode_constraint_reinforcer",
+    "promode_debugger",
+    "promode_environment_manager",
+    "promode_fast_worker",
+    "promode_product_design_expert",
+    "promode_senior_engineer",
+    "promode_verifier",
 }
 AGENT_CONTRACT_PHRASES = {
     "promode_agent_analyzer": [
         "without assuming transcript stability",
         "Do not parse entire large transcript files",
+        "Recovery process",
         "not crystallised into deterministic checks",
+    ],
+    "promode_auditor": [
+        "Promode methodology audits for Codex",
+        "Setup pre-flight",
+        "Prioritised action plan",
+    ],
+    "promode_chief_technology_officer": [
+        "hard-to-reverse architecture",
+        "GPT-5.5 for now",
+        "do not make code changes",
+        "Delegation-ready task breakdown",
+    ],
+    "promode_code_reviewer": [
+        "Lead with a verdict: APPROVED or REWORK",
+        "Failing-test-first evidence",
+        "Behavioral authority order",
+    ],
+    "promode_constraint_reinforcer": [
+        "A crucial constraint",
+        "A plain link alone does not carry a critical rule",
+        "Do not put Promode methodology itself into AGENTS.md",
     ],
     "promode_debugger": [
         "Default to diagnose-and-report",
@@ -41,20 +67,20 @@ AGENT_CONTRACT_PHRASES = {
         "reliable\narrange/reset/isolation",
         "runbook linked from RUNBOOKS.md",
     ],
-    "promode_implementer": [
-        "You implement code using TDD",
-        "Write or identify one failing behavioral test",
-        "Do not revert unrelated edits",
+    "promode_fast_worker": [
+        "the mechanical execution tier",
+        "Know your lane",
+        "selector-based actions, never hardcoded coordinates",
     ],
-    "promode_product_designer": [
+    "promode_product_design_expert": [
         "Default stance: skeptical",
         "Report a concrete recommendation",
         "Do not make code changes unless",
     ],
-    "promode_reviewer": [
-        "Lead with a verdict: APPROVED or REWORK",
-        "Tests are missing, superficial",
-        "Behavioral authority order",
+    "promode_senior_engineer": [
+        "the deep-reasoning implementation tier",
+        "Write or identify one failing behavioral test",
+        "Do not revert unrelated edits",
     ],
     "promode_verifier": [
         "PASS or FAIL",
@@ -62,24 +88,47 @@ AGENT_CONTRACT_PHRASES = {
         "Do not fix failures",
     ],
 }
+EXPECTED_AGENT_MODELS = {
+    "promode_agent_analyzer": "gpt-5.5",
+    "promode_auditor": "gpt-5.5",
+    "promode_chief_technology_officer": "gpt-5.5",
+    "promode_code_reviewer": "gpt-5.5",
+    "promode_constraint_reinforcer": "gpt-5.5",
+    "promode_debugger": "gpt-5.5",
+    "promode_environment_manager": "gpt-5.5",
+    "promode_fast_worker": "gpt-5.4-mini",
+    "promode_product_design_expert": "gpt-5.5",
+    "promode_senior_engineer": "gpt-5.5",
+    "promode_verifier": "gpt-5.5",
+}
 READ_ONLY_AGENTS = {
     "promode_agent_analyzer",
-    "promode_reviewer",
+    "promode_auditor",
+    "promode_chief_technology_officer",
+    "promode_code_reviewer",
     "promode_verifier",
 }
 REQUIRED_SKILLS = {
     "activate",
     "sync",
-    "managing-promode-codex",
     "promode-audit",
     "handoff",
+}
+FORBIDDEN_EXPOSED_SKILLS = {
+    "managing-promode-codex",
     "recovering-subagents",
     "discovery-to-determinism",
 }
 PROMODE_HOOK_NAMES = ("promode-main-context.py", "promode-agent-drift.py")
 DOCTRINE_DOCS = {
+    "agent-knowledge-wiki.md",
+    "codex-assumptions.md",
+    "discovery-to-determinism.md",
     "index.md",
+    "main-agent-delivery.md",
     "opinion-register.md",
+    "operator-seam-and-agent-tools.md",
+    "ui-state-graph-edt.md",
 }
 DOCTRINE_REGISTER_RELATIVE = Path(".codex") / "promode" / "docs" / "opinion-register.md"
 COMMON_AGENT_CONTRACT_PHRASES = (
@@ -223,6 +272,28 @@ def validate_activation_flow() -> None:
     ):
         if needle not in activate_text:
             fail(f"activate skill missing activation contract text: {needle}")
+    for needle in (
+        "promode_chief_technology_officer",
+        "promode_senior_engineer",
+        "promode_fast_worker",
+        "promode_code_reviewer",
+        "promode_product_design_expert",
+        "promode_auditor",
+        "promode_constraint_reinforcer",
+        ".codex/promode/docs/discovery-to-determinism.md",
+        "GPT-5.5",
+        "GPT-5.4-mini",
+    ):
+        if needle not in activate_text:
+            fail(f"activate skill missing mirrored Promode surface: {needle}")
+    for stale in (
+        "promode_implementer",
+        "promode_reviewer",
+        "promode_product_designer",
+        "Use the `discovery-to-determinism` skill",
+    ):
+        if stale in activate_text:
+            fail(f"activate skill contains stale surface: {stale}")
 
     for path in (activate_metadata, sync_metadata):
         metadata_text = path.read_text(encoding="utf-8")
@@ -235,10 +306,12 @@ def validate_activation_flow() -> None:
         "install-project-agents.py",
         "hook-based Promode artifacts",
         ".codex/promode/docs/",
+        ".codex/agents/promode_*.toml",
         "GitHub check",
         "--skip-upgrade-check",
         "$promode-codex:activate",
         ".codex/agents/",
+        "eleven",
     ):
         if needle not in sync_text:
             fail(f"sync skill missing contract text: {needle}")
@@ -263,24 +336,56 @@ def validate_doctrine_bundle() -> None:
     if "Claude" in register or "claude" in register:
         fail("opinion register must stay decoupled from Claude-specific wording")
 
+    discovery = (docs_root / "discovery-to-determinism.md").read_text(encoding="utf-8")
+    for needle in (
+        "Discovery to determinism",
+        "./ui-state-graph-edt.md",
+        "./operator-seam-and-agent-tools.md",
+        "This document teaches",
+    ):
+        if needle not in discovery:
+            fail(f"discovery-to-determinism doc missing doctrine text: {needle}")
+    if "name: discovery-to-determinism" in discovery or "references/" in discovery:
+        fail("discovery-to-determinism doc must not retain skill-local metadata")
+
+    codex_assumptions = (docs_root / "codex-assumptions.md").read_text(
+        encoding="utf-8"
+    )
+    for needle in (
+        "Explicit activation",
+        "Project-local doctrine bundle",
+        "Custom agents",
+        "Upgrade awareness",
+        "gpt-5.5",
+        "gpt-5.4-mini",
+    ):
+        if needle not in codex_assumptions:
+            fail(f"codex assumptions doc missing runtime text: {needle}")
+
 
 def validate_installer() -> None:
     with tempfile.TemporaryDirectory(prefix="promode-codex-install-") as tmp:
         project = Path(tmp)
         (project / ".git").mkdir()
         codex_dir = project / ".codex"
+        agents_dir = codex_dir / "agents"
         hooks_dir = codex_dir / "hooks"
         doctrine_dir = codex_dir / "promode" / "docs"
         stale_brief = codex_dir / "PROMODE_CODEX_MAIN.md"
         stale_main_hook = hooks_dir / "promode-main-context.py"
         stale_drift_hook = hooks_dir / "promode-agent-drift.py"
         stale_doctrine = doctrine_dir / "stale-doctrine.md"
+        stale_agent = agents_dir / "promode_implementer.toml"
+        unrelated_agent = agents_dir / "keep_me.toml"
         unrelated_promode_file = codex_dir / "promode" / "keep.txt"
         unrelated_hook = hooks_dir / "keep-me.py"
         hooks_json = codex_dir / "hooks.json"
 
+        agents_dir.mkdir(parents=True)
         hooks_dir.mkdir(parents=True)
         doctrine_dir.mkdir(parents=True)
+        stale_agent.write_text("stale promode agent\n", encoding="utf-8")
+        unrelated_agent.write_text("preserve me\n", encoding="utf-8")
         stale_brief.write_text("stale project brief\n", encoding="utf-8")
         stale_main_hook.write_text("legacy main hook\n", encoding="utf-8")
         stale_drift_hook.write_text("legacy drift hook\n", encoding="utf-8")
@@ -350,6 +455,10 @@ def validate_installer() -> None:
             fail("installer should sync project-local opinion register")
         if stale_doctrine.exists():
             fail("installer should remove stale generated doctrine files")
+        if stale_agent.exists():
+            fail("installer should remove stale Promode agent files")
+        if not unrelated_agent.is_file():
+            fail("installer should preserve non-Promode agent files")
         if not unrelated_promode_file.is_file():
             fail("installer should preserve non-doc files under .codex/promode")
         for path in (stale_brief, stale_main_hook, stale_drift_hook):
@@ -499,7 +608,14 @@ def is_promode_hook_command(command: object) -> bool:
 
 def validate_agents() -> None:
     root = ROOT / "standard" / "agents"
-    check_file(root / "promode_implementer.toml")
+    check_file(root / "promode_senior_engineer.toml")
+    for stale in (
+        root / "promode_implementer.toml",
+        root / "promode_reviewer.toml",
+        root / "promode_product_designer.toml",
+    ):
+        if stale.exists():
+            fail(f"stale compressed agent file must be absent: {stale.name}")
     seen = set()
     for path in sorted(root.glob("promode_*.toml")):
         data = tomllib.loads(path.read_text(encoding="utf-8"))
@@ -510,6 +626,9 @@ def validate_agents() -> None:
         seen.add(name)
         if name in READ_ONLY_AGENTS and data.get("sandbox_mode") != "read-only":
             fail(f"{path.name} must be read-only")
+        expected_model = EXPECTED_AGENT_MODELS.get(name)
+        if expected_model is not None and data.get("model") != expected_model:
+            fail(f"{path.name} must pin model {expected_model}")
         instructions = data["developer_instructions"]
         if "Hook-provided transcript paths" in instructions:
             fail(f"{path.name} contains stale hook-era transcript wording")
@@ -531,6 +650,8 @@ def validate_skills() -> None:
     skills_root = ROOT / "skills"
     seen = set()
     for skill in sorted(path for path in skills_root.iterdir() if path.is_dir()):
+        if skill.name in FORBIDDEN_EXPOSED_SKILLS:
+            fail(f"skill should not be exposed in Codex plugin: {skill.name}")
         skill_md = skill / "SKILL.md"
         check_file(skill_md)
         text = skill_md.read_text(encoding="utf-8")
@@ -548,6 +669,9 @@ def validate_skills() -> None:
     missing = REQUIRED_SKILLS - seen
     if missing:
         fail(f"missing required skills: {sorted(missing)}")
+    extra = seen - REQUIRED_SKILLS
+    if extra:
+        fail(f"unexpected exposed skills: {sorted(extra)}")
 
 
 def skill_frontmatter_name(frontmatter: str) -> str:

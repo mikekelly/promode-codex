@@ -79,6 +79,8 @@ def main() -> int:
         print(f"would create {target}")
         for source in agent_files:
             print(f"would copy {source.name} -> {target / source.name}")
+        for stale in stale_agent_files(target, agent_files):
+            print(f"would remove stale {stale}")
         print(f"would create {docs_target}")
         for source in doctrine_files:
             relative = source.relative_to(DOC_SOURCE)
@@ -93,10 +95,7 @@ def main() -> int:
             print(f"would remove legacy Promode hook entries from {hooks_json}")
         return 0
 
-    target.mkdir(parents=True, exist_ok=True)
-    for source in agent_files:
-        shutil.copy2(source, target / source.name)
-        print(f"installed {target / source.name}")
+    sync_agent_templates(target, agent_files)
 
     sync_doctrine_docs(docs_target, doctrine_files)
     cleanup_legacy_promode_hooks(project)
@@ -105,6 +104,32 @@ def main() -> int:
     if not args.skip_upgrade_check:
         warn_if_upgrade_available()
     return 0
+
+
+def sync_agent_templates(target: Path, source_files: list[Path]) -> None:
+    target.mkdir(parents=True, exist_ok=True)
+    for source in source_files:
+        destination = target / source.name
+        shutil.copy2(source, destination)
+        print(f"installed {destination}")
+
+    for stale in stale_agent_files(target, source_files):
+        stale.unlink()
+        print(f"removed stale {stale}")
+
+
+def stale_agent_files(target: Path, source_files: list[Path]) -> list[Path]:
+    if not target.is_dir():
+        return []
+    expected = {source.name for source in source_files}
+    return sorted(
+        (
+            path
+            for path in target.glob("promode_*.toml")
+            if path.is_file() and path.name not in expected
+        ),
+        reverse=True,
+    )
 
 
 def cleanup_legacy_promode_hooks(project: Path) -> None:
