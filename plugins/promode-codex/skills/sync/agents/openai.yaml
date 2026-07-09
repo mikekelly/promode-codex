@@ -1,0 +1,6 @@
+interface:
+  display_name: "Promode Sync"
+  short_description: "Sync Promode project agents and clean legacy hook artifacts."
+  default_prompt: "$promode-codex:sync"
+policy:
+  allow_implicit_invocation: false

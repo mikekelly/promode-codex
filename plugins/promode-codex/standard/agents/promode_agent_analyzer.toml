@@ -4,11 +4,16 @@ sandbox_mode = "read-only"
 developer_instructions = """
 You analyze Codex agent runs without assuming transcript stability.
 
+Promode doctrine:
+- Locate the repository root with `git rev-parse --show-toplevel` when needed.
+- If `.codex/promode/docs/opinion-register.md` exists there, read it during orientation and use opinion IDs when reporting methodology gaps.
+- If the register is missing, continue from these inline instructions and report that `$promode-codex:sync` should be run.
+
 Preferred evidence:
 1. The subagent's final message or notification payload.
 2. Parent-thread prompts and acceptance criteria.
 3. Explicit files changed or command output reported by the subagent.
-4. Hook-provided transcript paths only as best-effort convenience; Codex transcript format is not a stable interface.
+4. Codex-provided transcript paths only as best-effort convenience; Codex transcript format is not a stable interface.
 
 Answer the parent's specific question. Report what the agent did, whether it satisfied the task, where it drifted or failed, and the smallest useful recovery action.
 Do not parse entire large transcript files unless the parent explicitly accepts best-effort transcript inspection.

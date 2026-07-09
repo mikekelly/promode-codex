@@ -1,10 +1,10 @@
 # Verified Codex Assumptions
 
-Checked against current Codex docs and the local Codex CLI on 2026-06-06.
+Checked against current Codex docs and the local Codex CLI on 2026-07-09.
 
 ## Plugin packaging
 
-Codex plugins have `.codex-plugin/plugin.json` at plugin root. The root may also
+Codex plugins have `.codex-plugin/plugin.json` at plugin root. The root may
 include `skills/`, `hooks/`, `.mcp.json`, `.app.json`, and `assets/`.
 
 The source repository is a marketplace wrapper with
@@ -12,56 +12,38 @@ The source repository is a marketplace wrapper with
 cache copies contain only the plugin payload. Validators must not require the
 source marketplace wrapper when they are run from an installed plugin cache.
 
-If `hooks/hooks.json` exists, Codex discovers it by default when plugin hooks
-are enabled; the manifest does not need an explicit `hooks` field.
+Codex plugins can package skills, and skills can include scripts and references.
+Promode for Codex uses the plugin as the distribution unit and skills as the
+user-facing command surface.
 
-Plugin-bundled hooks are non-managed hooks. Codex will list them but skip them
-until the user reviews and trusts the current hook definition in `/hooks`.
+Promode for Codex deliberately does not ship `hooks/hooks.json` and does not
+install project-local main-session hooks by default. Users activate Promode
+explicitly with `$promode-codex:activate` at the start of each session. This
+avoids hook-trust and reload friction for the main-agent brief.
 
-The local harness checked during repo creation reported `hooks=true`,
-`plugins=true`, and `plugin_hooks=false`. Therefore this plugin's reliable setup
-path installs project-local `.codex/hooks.json` hooks and `.codex/hooks/`
-scripts. The project-local main hook receives `PLUGIN_ROOT` and reads the
-bundled plugin brief; it does not require a project copy of
-`PROMODE_CODEX_MAIN.md`. The bundled plugin hooks remain as a
-forward-compatible path for Codex builds where plugin hooks are enabled.
+## Explicit activation
 
-## Hook wire format
+The main Promode brief lives directly in `skills/activate/SKILL.md`. When the
+user invokes `$promode-codex:activate`, Codex reads that skill and the main
+agent uses it as the current-session operating contract.
 
-Command hooks receive one JSON object on stdin. Shared fields include:
+Do not copy the main brief into `AGENTS.md` or project `.codex/`. `AGENTS.md` is
+project-owned durable guidance and is inherited by subagents, while the main
+Promode brief is main-agent orchestration.
 
-- `hook_event_name`
-- `session_id`
-- `cwd`
-- `transcript_path`
-- `model`
-- `permission_mode`
+Activation is session-scoped. It is intentionally not automatic; the user runs
+`$promode-codex:activate` when they want Promode behavior in a thread.
 
-`SessionStart` adds `source`, with values `startup`, `resume`, `clear`, and
-`compact`. JSON stdout may include:
+The activate skill is main-agent-only. Both the activate and sync skills
+include `agents/openai.yaml` with `allow_implicit_invocation: false` so Codex
+does not choose them implicitly from a loose prompt. Explicit invocation still
+works.
 
-```json
-{
-  "hookSpecificOutput": {
-    "hookEventName": "SessionStart",
-    "additionalContext": "..."
-  }
-}
-```
-
-That text is added as extra developer context.
-
-Promode uses one `SessionStart` hook to inject the main-session brief and a
-separate `SessionStart` hook to warn when project-installed
-`.codex/agents/promode_*.toml` files no longer match the plugin's
-`standard/agents/promode_*.toml` files.
-
-`SubagentStart` can add subagent-only developer context with the same
-`hookSpecificOutput.additionalContext` shape and `hookEventName:
-"SubagentStart"`.
-
-`transcript_path` and `agent_transcript_path` are convenience fields. Codex docs
-state that transcript format is not a stable hook interface.
+Codex supports `[[skills.config]]` with `enabled = false` to disable a skill by
+`SKILL.md` path, and custom agent files may include `skills.config`. That is a
+path-specific override, not a documented subagent-wide skill blacklist. Because
+plugin cache paths are versioned, static Promode custom-agent templates cannot
+reliably hard-code a disable entry for the activate skill.
 
 ## Custom agents
 
@@ -85,9 +67,47 @@ Codex session may not expose those new role names immediately. Tell users to
 restart Codex, resume the project thread, or start a fresh session in the
 project so Codex reloads `.codex/agents/*.toml`.
 
+## Project-local doctrine bundle
+
+Copied project custom agents must not rely on plugin-cache relative paths. The
+installed plugin cache is versioned and may move when the marketplace upgrades.
+
+`$promode-codex:sync` therefore mirrors Promode-owned doctrine docs from
+`standard/docs/` into `.codex/promode/docs/`. Project custom agents read
+`.codex/promode/docs/opinion-register.md` from the target project during
+orientation when it is present. If the register is absent, agents continue from
+their inline role instructions and report that `$promode-codex:sync` should be
+run.
+
+Treat `.codex/promode/docs/` as generated Promode-owned setup state. Do not
+store unrelated project docs there.
+
+## Legacy hook cleanup
+
+Older Promode for Codex installs used project-local `SessionStart` hooks. The
+current sync path removes these Promode-owned artifacts:
+
+- `.codex/PROMODE_CODEX_MAIN.md`
+- `.codex/hooks/promode-main-context.py`
+- `.codex/hooks/promode-agent-drift.py`
+- Promode hook commands inside `.codex/hooks.json`
+
+Non-Promode hooks and non-Promode custom agents must be preserved.
+
+## Upgrade awareness
+
+After syncing project files, the sync helper performs a best-effort GitHub
+check for a newer Promode for Codex version. It compares the local plugin
+manifest version with stable upstream tags and the upstream main-branch plugin
+manifest. This check is advisory only: network failures, missing tags, or
+GitHub errors must not make project sync fail.
+
+Offline and deterministic validation runs can pass `--skip-upgrade-check`.
+
 ## Local CLI observations
 
 `codex --help` exposes `exec`, `review`, `mcp`, `plugin`, `features`, `debug`,
 and related commands. `codex plugin marketplace --help` exposes marketplace
-`add`, `upgrade`, and `remove`. `codex features list` shows `multi_agent`,
-`hooks`, and `plugins` enabled, with `plugin_hooks` disabled in this harness.
+`add`, `upgrade`, and `remove`. Current local `codex features list` shows
+`multi_agent`, `hooks`, and `plugins` enabled, with `plugin_hooks` removed and
+false in this harness.

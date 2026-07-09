@@ -12,9 +12,13 @@ under `plugins/promode-codex/`.
 
 The plugin adapts shared Promode practices to Codex's runtime:
 
-- main-session guidance is delivered by Codex hooks, not `AGENTS.md`;
-- project-scoped custom agents are installed into `.codex/agents/`;
-- project-local hooks are the reliable setup path while `plugin_hooks=false`;
+- main-session guidance is activated explicitly with `$promode-codex:activate`,
+  not stored in `AGENTS.md`;
+- project-scoped custom agents are synced into `.codex/agents/` by
+  `$promode-codex:sync`;
+- copied custom agents read shared Promode doctrine from the synced
+  `.codex/promode/docs/` bundle rather than plugin-cache paths;
+- legacy hook-based Promode artifacts are removed during sync;
 - Claude Code compatibility stays in the sibling `promode` repository.
 
 ## Goals
@@ -22,20 +26,23 @@ The plugin adapts shared Promode practices to Codex's runtime:
 - Make Promode available to Codex users as an installable plugin.
 - Keep the shared methodology recognizable while preserving Codex-specific
   runtime behavior.
-- Give agents fast, deterministic checks for plugin shape, hook behavior,
-  installer behavior, custom-agent templates, and skill structure.
+- Give agents fast, deterministic checks for plugin shape, activation/sync
+  behavior, custom-agent templates, and skill structure.
 - Keep project guidance concise and link detailed knowledge from `AGENTS.md`.
 
 ## Risks And Priorities
 
-- **Runtime drift:** Codex hook, plugin, and subagent semantics may change.
+- **Runtime drift:** Codex plugin, skill, and subagent semantics may change.
   Capture verified assumptions and validate the behavior this plugin relies on.
 - **Claude leakage:** Claude-specific hook paths, chunking rules, or compatibility
   files must not become Codex plugin behavior.
-- **Context injection failure:** The main Promode brief must reach the main
-  session through a trusted hook without being copied into project `AGENTS.md`.
+- **Activation failure:** The main Promode brief must be easy to load into the
+  current session without being copied into project `AGENTS.md`.
 - **Custom-agent staleness:** Project-installed Promode agents can drift from the
   plugin templates and may not be visible until Codex reloads the session.
+- **Doctrine drift:** Copied project agents need stable project-local doctrine;
+  plugin-cache paths are versioned and should not be treated as durable
+  subagent references.
 - **Local setup confusion:** In this marketplace checkout, root `/.codex/` is
   generated local install state with checkout-specific paths. In normal user
   projects, `.codex/` may be project-owned and should not be ignored by default.

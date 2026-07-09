@@ -5,8 +5,8 @@ Promode methodology from the Claude Code `promode` repo while preserving the
 Codex-specific runtime contract.
 
 The goal is alignment, not mechanical parity. Shared methodology should stay
-consistent. Runtime-specific delivery, hook behavior, agent format, install
-flow, and tool assumptions must remain Codex-native.
+consistent. Runtime-specific delivery, activation behavior, agent format,
+install flow, and tool assumptions must remain Codex-native.
 
 ## Source of truth
 
@@ -42,7 +42,7 @@ has moved files.
 
 | Shared concern | Claude Promode | Promode for Codex |
 | --- | --- | --- |
-| Main-agent methodology | `plugins/promode/PROMODE_MAIN_AGENT.md` | `plugins/promode-codex/standard/PROMODE_CODEX_MAIN.md` |
+| Main-agent methodology | `plugins/promode/PROMODE_MAIN_AGENT.md` | `plugins/promode-codex/skills/activate/SKILL.md` |
 | Implementer | `plugins/promode/agents/implementer.md` | `plugins/promode-codex/standard/agents/promode_implementer.toml` |
 | Reviewer | `plugins/promode/agents/code-reviewer.md` | `plugins/promode-codex/standard/agents/promode_reviewer.toml` |
 | Debugger | `plugins/promode/agents/debugger.md` | `plugins/promode-codex/standard/agents/promode_debugger.toml` |
@@ -51,7 +51,7 @@ has moved files.
 | Product designer | `plugins/promode/agents/product-design-expert.md` | `plugins/promode-codex/standard/agents/promode_product_designer.toml` |
 | Agent analyzer | `plugins/promode/agents/agent-analyzer.md` | `plugins/promode-codex/standard/agents/promode_agent_analyzer.toml` |
 | Shared skills | `plugins/promode/skills/` | `plugins/promode-codex/skills/` |
-| Hooks | `plugins/promode/hooks/` | `plugins/promode-codex/hooks/` and project-local `.codex/hooks/` installer output |
+| Activation/sync | `plugins/promode/hooks/`, `plugins/promode/docs/opinion-register.md` | `skills/activate/`, `skills/sync/`, `standard/docs/`, and `scripts/install-project-agents.py` |
 | Validation | `scripts/check-*.sh` | `plugins/promode-codex/scripts/validate-promode-codex.py` and plugin validator |
 | Runbooks | `RUNBOOKS.md`, `runbooks/` | `RUNBOOKS.md`, `runbooks/` |
 
@@ -76,7 +76,8 @@ has moved files.
    synthesis by the main agent, and durable runbook/knowledge capture.
 
    Do not copy Claude-specific hook chunking, Claude command names, transcript
-   assumptions, or `.claude/` install paths into the Codex brief.
+   assumptions, or `.claude/` install paths into the Codex brief. Codex main
+   prompting is activated explicitly with `$promode-codex:activate`.
 
 3. **Compare agent definitions by role.**
 
@@ -107,17 +108,17 @@ has moved files.
    Claude-only skills should be assessed explicitly: either port them, record
    why they are not applicable, or add a Codex-native equivalent.
 
-5. **Compare hooks and install behavior by intent.**
+5. **Compare delivery and install behavior by intent.**
 
-   Claude and Codex hooks use different runtimes. Compare what they guarantee,
-   not their implementation language:
+   Claude hooks and Codex explicit activation use different runtimes. Compare
+   what they guarantee, not their implementation language:
 
-   - main brief is injected only into the main session;
-   - hook output stays within runtime limits;
-   - users can review/trust hooks;
-   - project-local install paths are reliable in the current harness;
+   - main brief reaches the main session without going into `AGENTS.md`;
+   - subagents do not inherit main-agent orchestration from project guidance;
+   - project sync is explicit and deterministic;
    - Promode-owned project artifacts can be refreshed safely;
-   - project-installed Codex agents are checked for drift.
+   - legacy Promode hook artifacts are removed;
+   - project-installed Codex agents can be reloaded after restart/resume.
 
 6. **Compare docs and runbooks.**
 
@@ -131,7 +132,7 @@ has moved files.
    When a shared methodology change is real, update every Codex home that
    carries it in the same change:
 
-   - `plugins/promode-codex/standard/PROMODE_CODEX_MAIN.md`
+   - `plugins/promode-codex/skills/activate/SKILL.md`
    - relevant `plugins/promode-codex/standard/agents/promode_*.toml`
    - relevant `plugins/promode-codex/skills/*`
    - `README.md`, `AGENTS.md`, or runbooks if behavior changed

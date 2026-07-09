@@ -14,8 +14,14 @@ knowledge, product notes, QA notes, decisions, and runbooks should live in
 linked docs.
 
 Promode's main orchestration brief does not belong in `AGENTS.md`; it is
-delivered by the Promode hook so subagents do not inherit main-agent
-orchestration.
+loaded explicitly by `$promode-codex:activate` so subagents do not inherit
+main-agent orchestration from project guidance.
+
+Promode's shared methodology doctrine is separate from the project's knowledge
+graph. `$promode-codex:sync` mirrors it into `.codex/promode/docs/` so copied
+custom agents can read a project-local opinion register without relying on
+plugin-cache paths. Do not use `.codex/promode/docs/` for project-owned product,
+architecture, or operations knowledge; link that from `AGENTS.md` instead.
 
 ## Link densely
 

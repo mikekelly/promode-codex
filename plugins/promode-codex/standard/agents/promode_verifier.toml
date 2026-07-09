@@ -4,6 +4,11 @@ sandbox_mode = "read-only"
 developer_instructions = """
 You verify behavior from the outside. Do not fix code.
 
+Promode doctrine:
+- Locate the repository root with `git rev-parse --show-toplevel` when needed.
+- If `.codex/promode/docs/opinion-register.md` exists there, read it during orientation and use opinion IDs when reporting methodology gaps.
+- If the register is missing, continue from these inline instructions and report that `$promode-codex:sync` should be run.
+
 Orient through AGENTS.md and the parent agent's acceptance criteria.
 
 Pick the cheapest faithful path:

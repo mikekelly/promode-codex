@@ -1,18 +1,17 @@
 ---
 name: managing-promode-codex
-description: "Install, update, audit, or repair Promode for Codex in a project. MUST be loaded when the user asks to set up promode-codex, install Promode for Codex custom agents, check the Codex Promode hook or setup, update the project-scoped Promode agents, scaffold Promode project tracking files, or verify that Promode is correctly adapted for Codex."
+description: "Compatibility router for Promode for Codex setup, activation, audit, sync, install, repair, update, and migration requests. Prefer the dedicated activate and sync skills when the user asks to turn Promode on or sync project files."
 ---
 
 <essential_principles>
 Promode for Codex has two layers:
 
-1. **Plugin layer** - this plugin supplies skills and bundled `SessionStart`
-   hooks for Codex builds where plugin hooks are enabled.
-2. **Project layer** - the setup workflow installs a project-local
-   `SessionStart` hook pair and project-scoped custom agents under `.codex/`.
-   The project-local main hook reads the bundled plugin brief through
-   `PLUGIN_ROOT`. This is the reliable path in the current local harness, where
-   `plugin_hooks` is disabled but regular hooks are enabled.
+1. **Plugin layer** - this plugin supplies explicit skills. Users run
+   `$promode-codex:activate` to load the main Promode brief into the current
+   session.
+2. **Project layer** - `$promode-codex:sync` syncs project-scoped custom
+   agents under `.codex/agents/`, a Promode doctrine bundle under
+   `.codex/promode/docs/`, and removes legacy hook-based Promode artifacts.
 
 The project's `AGENTS.md` is project-owned. Promode may offer to scaffold it
 when missing, but must never overwrite or rewrite it without explicit user
@@ -20,9 +19,9 @@ approval.
 </essential_principles>
 
 <codex_runtime_facts>
-- Codex discovers plugin hooks from `hooks/hooks.json` by default when plugin
-  hooks are enabled.
-- Codex skips non-managed hooks until the user reviews and trusts them with `/hooks`.
+- Codex plugins can package skills. Skills can include scripts and references.
+- Promode for Codex no longer uses hooks as the primary main-brief delivery
+  path; activation is explicit and session-scoped.
 - Codex custom agents live in `~/.codex/agents/` or `<project>/.codex/agents/`.
 - A running session may not expose newly installed or refreshed project custom
   agents by name until Codex is restarted, resumed, or a fresh session is
@@ -36,39 +35,41 @@ approval.
 - Never create, overwrite, or rewrite `AGENTS.md` without explicit user consent.
 - Never write Promode's main orchestration brief into `AGENTS.md`.
 - Never hand-edit `~/.codex/config.toml` unless the user asked for user-global setup.
-- Never assume hooks are running; check or tell the user to review `/hooks`.
+- Never install Promode main-session hooks as the default setup path.
 - Never delete existing `.codex/agents/*.toml` files that are not Promode-owned.
 </never_do>
 
 <routing>
 | User intent | Workflow |
 | --- | --- |
-| install, set up, add promode-codex | `workflows/install.md` |
-| update, refresh, repair Promode agents | `workflows/update.md` |
+| activate, turn on Promode, load main brief | Use `../activate/SKILL.md` |
+| sync, install, set up, add, update, refresh, repair Promode agents | `workflows/sync.md` |
 | audit, check setup, verify install | `workflows/audit.md` |
 
 Route directly when intent is clear. Ask only when the user has not specified
-install/update/audit and the surrounding context does not disambiguate it.
+sync/install/audit and the surrounding context does not disambiguate it.
 </routing>
 
 <reference_index>
 - `references/codex-assumptions.md` - verified Codex behavior this plugin relies on.
-- `../../standard/PROMODE_CODEX_MAIN.md` - bundled main-session brief loaded by the project or plugin hook.
-- `../../standard/agents/*.toml` - project custom-agent templates installed by workflows.
-- `../../hooks/hooks.json`, `../../hooks/promode-main-context.py`, and
-  `../../hooks/promode-agent-drift.py` - bundled hooks.
+- `../activate/SKILL.md` - main-session brief loaded by `$promode-codex:activate`.
+- `../../standard/agents/*.toml` - project custom-agent templates synced by
+  `$promode-codex:sync`.
+- `../../standard/docs/` - project-local Promode doctrine bundle synced by
+  `$promode-codex:sync`.
+- `../../scripts/install-project-agents.py` - deterministic project sync helper.
 </reference_index>
 
 <success_criteria>
 A project is set up when:
-- `.codex/hooks/promode-main-context.py` exists.
-- `.codex/hooks/promode-agent-drift.py` exists.
-- `.codex/hooks.json` has a Promode `SessionStart` hook.
 - `.codex/agents/promode_*.toml` exists for all standard Promode agents.
+- `.codex/promode/docs/opinion-register.md` exists for project-local Promode
+  doctrine.
 - Existing non-Promode `.codex/agents` files are preserved.
-- The user knows project hooks must be trusted through `/hooks`.
 - The user knows to restart, resume, or start a fresh Codex session so newly
   installed custom-agent roles are available.
+- The user knows to run `$promode-codex:activate` at the start of sessions where
+  they want Promode behavior.
 - `AGENTS.md` was left alone unless the user explicitly accepted scaffolding.
 - Optional tracking files were created only when missing and approved.
 </success_criteria>

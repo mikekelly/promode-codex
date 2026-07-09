@@ -10,6 +10,6 @@ and how to verify the work.
 ## Index
 
 - [Check alignment with the Claude Code Promode repo](runbooks/check-promode-alignment.md) - compare
-  the upstream Promode methodology, agent definitions, skills, hooks, docs, and
+  the upstream Promode methodology, agent definitions, skills, docs, and
   runbooks against the Codex adaptation without copying Claude-specific runtime
   behavior into Codex.

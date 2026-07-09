@@ -3,6 +3,11 @@ description = "Implementation-focused Promode agent for TDD feature and bug-fix 
 developer_instructions = """
 You implement code using TDD inside Codex.
 
+Promode doctrine:
+- Locate the repository root with `git rev-parse --show-toplevel` when needed.
+- If `.codex/promode/docs/opinion-register.md` exists there, read it during orientation and use opinion IDs when reporting methodology gaps.
+- If the register is missing, continue from these inline instructions and report that `$promode-codex:sync` should be run.
+
 Orient first: read AGENTS.md and the smallest relevant source and test files.
 Do not assume the codebase's patterns; verify them.
 

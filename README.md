@@ -1,7 +1,7 @@
 # Promode for Codex
 
 Promode for Codex adapts the Promode AI-assisted software development
-methodology to Codex's plugin, hook, skill, and subagent runtime.
+methodology to Codex's plugin, skill, and subagent runtime.
 
 This is intentionally a separate plugin from the Claude Code version. The
 methodology is shared; the runtime contract is not.
@@ -10,23 +10,29 @@ methodology is shared; the runtime contract is not.
 
 - A Codex marketplace manifest at `.agents/plugins/marketplace.json`
 - A Codex plugin manifest at `plugins/promode-codex/.codex-plugin/plugin.json`
-- Bundled `SessionStart` hooks, plus project-local hook install support, that
-  inject the Promode main-agent brief and check project-agent drift
+- `$promode-codex:activate` to load the Promode main-agent brief into the
+  current session
+- `$promode-codex:sync` to sync project-scoped custom agents and remove
+  legacy hook-based Promode artifacts
 - Codex skills for setup, audits, handoff, subagent recovery, and
   discovery-to-determinism testing strategy
 - Project-scoped custom-agent templates under `plugins/promode-codex/standard/agents/`
-- Validation scripts that check the hook output and custom-agent TOML
+- Project-local Promode doctrine templates under `plugins/promode-codex/standard/docs/`
+- Validation scripts that check activation/sync behavior and custom-agent TOML
 
 ## Codex Adaptation
 
 Promode for Codex differs from the Claude Code plugin in important ways:
 
-- Codex hooks require review and trust in `/hooks` before they run.
-- This local harness currently reports `plugin_hooks=false`, so project setup
-  installs a project-local `.codex/hooks.json` hook as the reliable path. The
-  bundled plugin hook remains for Codex builds where plugin hooks are enabled.
+- Promode activation is explicit. Run `$promode-codex:activate` at the start of
+  each Codex session where you want Promode behavior.
+- Project setup no longer installs Promode main-session hooks. `$promode-codex:sync`
+  removes legacy Promode hook artifacts from older installs.
 - Codex custom agents live in `.codex/agents/*.toml` or `~/.codex/agents/*.toml`;
   they are not bundled plugin agent files.
+- Copied project custom agents read shared Promode doctrine from
+  `.codex/promode/docs/opinion-register.md`; they do not reference versioned
+  plugin-cache paths.
 - Codex subagents inherit parent runtime settings and are config layers, not
   separate hard-permission boundaries.
 - Codex transcript paths are convenience fields, not stable APIs.
@@ -46,7 +52,7 @@ codex plugin marketplace upgrade
 codex plugin add promode-codex@promode-codex
 ```
 
-Then start a new thread so Codex loads the plugin's skills and hooks. You can
+Then start a new thread so Codex loads the plugin's skills. You can
 also open Codex, run `/plugins`, select **Promode for Codex**, and install it
 from the plugin UI.
 
@@ -83,38 +89,49 @@ The marketplace manifest in this repo uses this shape:
 
 ## Set Up a Project
 
-After the plugin is installed and enabled, ask Codex from the target project:
+After the plugin is installed and enabled, run these from the target project:
 
 ```text
-Set up promode-codex in this project.
+$promode-codex:sync
+$promode-codex:activate
 ```
 
-The `managing-promode-codex` skill installs project-scoped Promode agents into
-`.codex/agents/`, copies project-local hook scripts into `.codex/hooks/`, and
-merges the Promode `SessionStart` hook pair into `.codex/hooks.json`. The main
-brief stays bundled in the plugin; the project-local main hook reads it through
-`PLUGIN_ROOT`.
+`$promode-codex:sync` installs or refreshes project-scoped Promode agents in
+`.codex/agents/` and removes legacy Promode hook artifacts left by older
+installs. It also mirrors Promode doctrine into `.codex/promode/docs/` so copied
+agents can read the project-local opinion register. It preserves non-Promode
+agents and non-Promode hooks. After a successful sync, it performs a
+best-effort GitHub version check and warns if the installed plugin copy is older
+than the latest available Promode for Codex version.
 
-Review and trust the project hooks with `/hooks`, then restart Codex, resume the
-project thread, or start a fresh session in the project. This lets `SessionStart`
-hooks run and lets Codex expose the newly installed project custom-agent roles.
+Restart Codex, resume the project thread, or start a fresh session in the
+project after sync so Codex exposes the newly installed project custom-agent
+roles.
+
+`$promode-codex:activate` contains the main Promode brief and makes Promode
+active for the current main-agent session. Activation is explicit and
+session-scoped; run it at the start of each main-agent session where you want
+Promode behavior. It is not intended for subagents, which should use their
+custom-agent instructions.
 
 ## Installation While Developing Locally
 
 From a Codex session with this plugin installed and enabled:
 
-1. Ask Codex: `Set up promode-codex in this project`.
-2. The `managing-promode-codex` skill installs project agents into
-   `.codex/agents/` and project-local `SessionStart` hooks under `.codex/`.
-3. Review and trust the project hook with `/hooks`, then restart Codex, resume
-   the project thread, or start a fresh session in the project so the main brief
-   and project custom-agent roles are loaded.
+1. Run `$promode-codex:sync`.
+2. Restart Codex, resume the project thread, or start a fresh session in the
+   project so project custom-agent roles are loaded.
+3. Run `$promode-codex:activate` in each session where you want Promode
+   behavior.
 
 For a direct local install of project agents from this repo:
 
 ```bash
 python3 plugins/promode-codex/scripts/install-project-agents.py /path/to/project
 ```
+
+Then restart or resume Codex in that project and run `$promode-codex:activate`.
+Use `--skip-upgrade-check` for deterministic local validation or offline runs.
 
 ## Validate
 
@@ -154,7 +171,7 @@ requiring the source-repo `.agents/plugins/marketplace.json` wrapper.
 
 Operational maintenance runbooks live in [`RUNBOOKS.md`](RUNBOOKS.md). Start
 with [Check alignment with the Claude Code Promode repo](runbooks/check-promode-alignment.md)
-when syncing methodology, agent definitions, skills, hooks, docs, or runbooks
+when syncing methodology, agent definitions, skills, docs, or runbooks
 from the Claude Code Promode plugin into this Codex adaptation.
 
 ## Sources Checked
@@ -163,7 +180,6 @@ This repo is tuned against current Codex docs for:
 
 - Plugins: https://developers.openai.com/codex/plugins/build
 - Skills: https://developers.openai.com/codex/skills
-- Hooks: https://developers.openai.com/codex/hooks
 - Subagents: https://developers.openai.com/codex/subagents
 
 See `plugins/promode-codex/skills/managing-promode-codex/references/codex-assumptions.md`

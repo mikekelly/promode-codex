@@ -1,6 +1,6 @@
 ---
 name: promode-audit
-description: "Audit how well a repository aligns with the Promode methodology in Codex, then produce a prioritised improvement plan. Use when the user asks to assess Promode alignment, audit a repo against Promode practices, improve tests, feedback loops, traceability, agent knowledge, runbooks, or architecture, or bring a codebase into Promode shape. Also flags stale Claude Promode install leftovers; use managing-promode-codex for Codex setup audits."
+description: "Audit how well a repository aligns with the Promode methodology in Codex, then produce a prioritised improvement plan. Use when the user asks to assess Promode alignment, audit a repo against Promode practices, improve tests, feedback loops, traceability, agent knowledge, runbooks, or architecture, or bring a codebase into Promode shape. Also flags stale Claude Promode install leftovers and legacy Promode Codex hook artifacts; use sync for Codex setup repair."
 ---
 
 <objective>
@@ -22,19 +22,24 @@ architecture dimensions; otherwise use built-in `explorer` or `default`.
 
 <reference_index>
 - `references/agent-knowledge-wiki.md` - Codex AGENTS.md-rooted knowledge graph model.
-- `references/main-agent-delivery.md` - why Promode main-agent orchestration is hook-delivered.
+- `references/main-agent-delivery.md` - why Promode main-agent orchestration is explicitly activated.
 </reference_index>
 
 <process>
 1. **Frame** - Skim `AGENTS.md` and `README` to understand stack, size, commands,
    and product purpose. If no `AGENTS.md` exists, note that as an orientation gap.
    Also do a setup pre-flight:
-   - For Codex, `.codex/hooks.json`,
-     `.codex/hooks/promode-main-context.py`,
-     `.codex/hooks/promode-agent-drift.py`, and
-     `.codex/agents/promode_*.toml` are expected after setup.
-     `.codex/PROMODE_CODEX_MAIN.md` is a stale artifact; the hook should read
-     the bundled plugin brief through `PLUGIN_ROOT`.
+   - For Codex, `.codex/agents/promode_*.toml` are expected after
+     `$promode-codex:sync`.
+   - `.codex/promode/docs/opinion-register.md` is expected after
+     `$promode-codex:sync`; missing doctrine means copied custom agents only
+     have inline fallback instructions.
+   - `.codex/PROMODE_CODEX_MAIN.md`, `.codex/hooks/promode-main-context.py`,
+     `.codex/hooks/promode-agent-drift.py`, and Promode commands in
+     `.codex/hooks.json` are legacy artifacts. Recommend `$promode-codex:sync`
+     to remove them.
+   - Promode's main brief is activated per session with
+     `$promode-codex:activate`.
    - Flag stale Claude Promode leftovers (`.claude/PROMODE_MAIN_AGENT.md`,
      `.claude/hooks/promode-main-context.sh`, or a Promode SessionStart entry
      in `.claude/settings.json`) as warnings because they can double-inject

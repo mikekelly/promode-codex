@@ -4,11 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 from pathlib import Path
 import shutil
-import shlex
 import subprocess
 import sys
 import tempfile
@@ -67,6 +67,26 @@ READ_ONLY_AGENTS = {
     "promode_reviewer",
     "promode_verifier",
 }
+REQUIRED_SKILLS = {
+    "activate",
+    "sync",
+    "managing-promode-codex",
+    "promode-audit",
+    "handoff",
+    "recovering-subagents",
+    "discovery-to-determinism",
+}
+PROMODE_HOOK_NAMES = ("promode-main-context.py", "promode-agent-drift.py")
+DOCTRINE_DOCS = {
+    "index.md",
+    "opinion-register.md",
+}
+DOCTRINE_REGISTER_RELATIVE = Path(".codex") / "promode" / "docs" / "opinion-register.md"
+COMMON_AGENT_CONTRACT_PHRASES = (
+    ".codex/promode/docs/opinion-register.md",
+    "git rev-parse --show-toplevel",
+    "$promode-codex:sync",
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -136,7 +156,14 @@ def validate_manifest() -> None:
     if data.get("skills") != "./skills/":
         fail("plugin manifest must point skills to ./skills/")
     if "hooks" in data:
-        fail("hooks field is intentionally omitted; Codex discovers hooks/hooks.json by default")
+        fail("hooks field must be omitted; Promode Codex uses explicit activation")
+    for stale in (
+        ROOT / "hooks" / "hooks.json",
+        ROOT / "hooks" / "promode-main-context.py",
+        ROOT / "hooks" / "promode-agent-drift.py",
+    ):
+        if stale.exists():
+            fail(f"plugin must not ship legacy hook artifact: {stale.relative_to(ROOT)}")
 
 
 def validate_marketplace(source_root: Path) -> None:
@@ -167,75 +194,144 @@ def validate_marketplace(source_root: Path) -> None:
         fail("marketplace plugin category must be Productivity")
 
 
-def validate_hook() -> None:
-    hooks_json = ROOT / "hooks" / "hooks.json"
-    main_script = ROOT / "hooks" / "promode-main-context.py"
-    drift_script = ROOT / "hooks" / "promode-agent-drift.py"
-    check_file(hooks_json)
-    check_file(main_script)
-    check_file(drift_script)
-    hook_config = json.loads(hooks_json.read_text(encoding="utf-8"))
-    commands = {
-        hook.get("command")
-        for group in hook_config.get("hooks", {}).get("SessionStart", [])
-        if isinstance(group, dict)
-        for hook in group.get("hooks", [])
-        if isinstance(hook, dict)
-    }
-    for command in (
-        "python3 ${PLUGIN_ROOT}/hooks/promode-main-context.py",
-        "python3 ${PLUGIN_ROOT}/hooks/promode-agent-drift.py",
+def validate_activation_flow() -> None:
+    activate = ROOT / "skills" / "activate" / "SKILL.md"
+    activate_metadata = ROOT / "skills" / "activate" / "agents" / "openai.yaml"
+    sync = ROOT / "skills" / "sync" / "SKILL.md"
+    sync_metadata = ROOT / "skills" / "sync" / "agents" / "openai.yaml"
+    check_file(activate)
+    check_file(activate_metadata)
+    check_file(sync)
+    check_file(sync_metadata)
+    if (ROOT / "standard" / "PROMODE_CODEX_MAIN.md").exists():
+        fail("main brief must live in skills/activate/SKILL.md, not standard/")
+
+    activate_text = activate.read_text(encoding="utf-8")
+    for needle in (
+        "Promode for Codex main-agent brief",
+        "Main-agent-only activation",
+        "not intended for subagents",
+        "<role>",
+        "<codex-runtime-contract>",
+        "<promode-doctrine>",
+        "<delegation-map>",
+        "<activation-scope>",
+        ".codex/promode/docs/opinion-register.md",
+        "opinion IDs",
+        "$promode-codex:sync",
+        "Activation is not persistent",
     ):
-        if command not in commands:
-            fail(f"hooks.json missing command: {command}")
+        if needle not in activate_text:
+            fail(f"activate skill missing activation contract text: {needle}")
 
-    sample = {
-        "hook_event_name": "SessionStart",
-        "source": "startup",
-        "cwd": str(ROOT),
-        "session_id": "test",
-        "transcript_path": None,
-        "model": "gpt-test",
-        "permission_mode": "default",
-    }
-    proc = run_hook(main_script, sample)
-    if not proc.stdout:
-        fail("main hook produced no output")
-    output = json.loads(proc.stdout)
-    if "active in this session" not in output.get("systemMessage", ""):
-        fail("main hook systemMessage should confirm Promode is active in this session")
-    hook_output = output.get("hookSpecificOutput", {})
-    if hook_output.get("hookEventName") != "SessionStart":
-        fail("main hook output missing SessionStart hookEventName")
-    context = hook_output.get("additionalContext", "")
-    if "Promode for Codex" not in context:
-        fail("main hook context does not include Promode for Codex brief")
+    for path in (activate_metadata, sync_metadata):
+        metadata_text = path.read_text(encoding="utf-8")
+        if "allow_implicit_invocation: false" not in metadata_text:
+            fail(f"{path.parent.parent.name} skill must disable implicit invocation")
 
-    proc = run_hook(drift_script, sample)
-    if proc.stdout.strip():
-        fail("drift hook should be quiet when the repo has no project Promode artifacts")
-    validate_drift_hook_clean_project(drift_script)
-    validate_drift_hook_warning(drift_script)
+    sync_text = sync.read_text(encoding="utf-8")
+    for needle in (
+        "Explicit user-invoked",
+        "install-project-agents.py",
+        "hook-based Promode artifacts",
+        ".codex/promode/docs/",
+        "GitHub check",
+        "--skip-upgrade-check",
+        "$promode-codex:activate",
+        ".codex/agents/",
+    ):
+        if needle not in sync_text:
+            fail(f"sync skill missing contract text: {needle}")
 
-    sample_project = ROOT / ".codex"
-    project_main_hook = sample_project / "hooks" / "promode-main-context.py"
-    project_drift_hook = sample_project / "hooks" / "promode-agent-drift.py"
-    project_brief = sample_project / "PROMODE_CODEX_MAIN.md"
-    if project_main_hook.exists() or project_drift_hook.exists() or project_brief.exists():
-        fail("repo root must not contain installed project hook artifacts")
+
+def validate_doctrine_bundle() -> None:
+    docs_root = ROOT / "standard" / "docs"
+    for name in DOCTRINE_DOCS:
+        check_file(docs_root / name)
+
+    register = (docs_root / "opinion-register.md").read_text(encoding="utf-8")
+    for needle in (
+        "Promode for Codex opinion register",
+        "no-plugin-cache-coupling",
+        "tdd-non-negotiable",
+        "operator-seam-bulk-below-ui",
+        "sync-skill",
+        ".codex/promode/docs/opinion-register.md",
+    ):
+        if needle not in register:
+            fail(f"opinion register missing doctrine text: {needle}")
+    if "Claude" in register or "claude" in register:
+        fail("opinion register must stay decoupled from Claude-specific wording")
 
 
 def validate_installer() -> None:
     with tempfile.TemporaryDirectory(prefix="promode-codex-install-") as tmp:
         project = Path(tmp)
         (project / ".git").mkdir()
-        stale_brief = project / ".codex" / "PROMODE_CODEX_MAIN.md"
-        stale_brief.parent.mkdir()
+        codex_dir = project / ".codex"
+        hooks_dir = codex_dir / "hooks"
+        doctrine_dir = codex_dir / "promode" / "docs"
+        stale_brief = codex_dir / "PROMODE_CODEX_MAIN.md"
+        stale_main_hook = hooks_dir / "promode-main-context.py"
+        stale_drift_hook = hooks_dir / "promode-agent-drift.py"
+        stale_doctrine = doctrine_dir / "stale-doctrine.md"
+        unrelated_promode_file = codex_dir / "promode" / "keep.txt"
+        unrelated_hook = hooks_dir / "keep-me.py"
+        hooks_json = codex_dir / "hooks.json"
+
+        hooks_dir.mkdir(parents=True)
+        doctrine_dir.mkdir(parents=True)
         stale_brief.write_text("stale project brief\n", encoding="utf-8")
+        stale_main_hook.write_text("legacy main hook\n", encoding="utf-8")
+        stale_drift_hook.write_text("legacy drift hook\n", encoding="utf-8")
+        stale_doctrine.write_text("stale generated doctrine\n", encoding="utf-8")
+        unrelated_promode_file.write_text("preserve me\n", encoding="utf-8")
+        unrelated_hook.write_text("unrelated hook\n", encoding="utf-8")
+        hooks_json.write_text(
+            json.dumps(
+                {
+                    "hooks": {
+                        "SessionStart": [
+                            {
+                                "matcher": "startup|resume",
+                                "hooks": [
+                                    {
+                                        "type": "command",
+                                        "command": "python3 .codex/hooks/keep-me.py",
+                                    },
+                                    {
+                                        "type": "command",
+                                        "command": (
+                                            "python3 .codex/hooks/"
+                                            "promode-main-context.py"
+                                        ),
+                                    },
+                                ],
+                            },
+                            {
+                                "matcher": "compact",
+                                "hooks": [
+                                    {
+                                        "type": "command",
+                                        "command": (
+                                            "python3 .codex/hooks/"
+                                            "promode-agent-drift.py"
+                                        ),
+                                    }
+                                ],
+                            },
+                        ]
+                    }
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
         installer = ROOT / "scripts" / "install-project-agents.py"
         for _ in range(2):
             proc = subprocess.run(
-                [sys.executable, str(installer), str(project)],
+                [sys.executable, str(installer), "--skip-upgrade-check", str(project)],
                 text=True,
                 capture_output=True,
                 check=False,
@@ -244,44 +340,72 @@ def validate_installer() -> None:
                 fail(f"installer exited {proc.returncode}: {proc.stderr}")
             if "Restart or resume Codex" not in proc.stdout:
                 fail("installer should advise restarting or resuming Codex")
+            if "$promode-codex:activate" not in proc.stdout:
+                fail("installer should advise explicit Promode activation")
 
-        hooks_json = project / ".codex" / "hooks.json"
-        for path in (
-            project / ".codex" / "hooks" / "promode-main-context.py",
-            project / ".codex" / "hooks" / "promode-agent-drift.py",
-        ):
-            if not path.is_file():
-                fail(f"installer missing file: {path}")
-        if (project / ".codex" / "PROMODE_CODEX_MAIN.md").exists():
-            fail("installer should not copy PROMODE_CODEX_MAIN.md into the project")
+        for agent in AGENTS:
+            if not (project / ".codex" / "agents" / f"{agent}.toml").is_file():
+                fail(f"installer missing agent: {agent}")
+        if not (project / DOCTRINE_REGISTER_RELATIVE).is_file():
+            fail("installer should sync project-local opinion register")
+        if stale_doctrine.exists():
+            fail("installer should remove stale generated doctrine files")
+        if not unrelated_promode_file.is_file():
+            fail("installer should preserve non-doc files under .codex/promode")
+        for path in (stale_brief, stale_main_hook, stale_drift_hook):
+            if path.exists():
+                fail(f"installer should remove legacy artifact: {path}")
+        if not unrelated_hook.is_file():
+            fail("installer should preserve unrelated hook files")
+
+        hooks_payload = json.loads(hooks_json.read_text(encoding="utf-8"))
         commands = [
             hook.get("command")
-            for group in json.loads(hooks_json.read_text(encoding="utf-8"))["hooks"][
-                "SessionStart"
-            ]
+            for groups in hooks_payload.get("hooks", {}).values()
+            if isinstance(groups, list)
+            for group in groups
+            if isinstance(group, dict)
             for hook in group.get("hooks", [])
+            if isinstance(hook, dict)
         ]
-        expected_main = (
-            f"PLUGIN_ROOT={shlex.quote(str(ROOT))} "
-            'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/promode-main-context.py"'
-        )
-        expected_drift = (
-            f"PLUGIN_ROOT={shlex.quote(str(ROOT))} "
-            'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/promode-agent-drift.py"'
-        )
-        if commands.count(expected_main) != 1:
-            fail("installer should write exactly one project main-context hook command")
-        if commands.count(expected_drift) != 1:
-            fail("installer should write exactly one project agent-drift hook command")
-        if len(commands) != len(set(commands)):
-            fail("installer should not duplicate hook commands on repeat runs")
+        if "python3 .codex/hooks/keep-me.py" not in commands:
+            fail("installer should preserve unrelated hook commands")
+        for command in commands:
+            if is_promode_hook_command(command):
+                fail("installer should remove Promode hook commands")
 
-        proc = run_hook(
-            project / ".codex" / "hooks" / "promode-agent-drift.py",
-            hook_sample(project),
+
+def validate_upgrade_check_parsing() -> None:
+    installer = load_installer_module()
+    ls_remote = "\n".join(
+        (
+            "1111111111111111111111111111111111111111\trefs/tags/v2.9.4",
+            "2222222222222222222222222222222222222222\trefs/tags/2.10.0",
+            "3333333333333333333333333333333333333333\trefs/tags/v2.10.0^{}",
+            "4444444444444444444444444444444444444444\trefs/tags/2.10.0-beta",
+            "5555555555555555555555555555555555555555\trefs/heads/main",
         )
-        if proc.stdout.strip():
-            fail("installed project drift hook should be quiet for matching agents")
+    )
+    if installer.latest_version_from_ls_remote(ls_remote) != "2.10.0":
+        fail("installer should parse the latest stable semver tag from ls-remote")
+    if installer.parse_semver("v2.10.0") != (2, 10, 0):
+        fail("installer should parse v-prefixed semver")
+    if installer.parse_semver("2.10.0-beta") is not None:
+        fail("installer should ignore prerelease versions for upgrade warnings")
+    if not installer.is_newer_version("2.10.1", "2.10.0"):
+        fail("installer should detect newer patch versions")
+    if installer.is_newer_version("2.9.9", "2.10.0"):
+        fail("installer should not downgrade users")
+
+
+def load_installer_module():
+    path = ROOT / "scripts" / "install-project-agents.py"
+    spec = importlib.util.spec_from_file_location("install_project_agents", path)
+    if spec is None or spec.loader is None:
+        fail("could not load install-project-agents.py for validation")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def validate_repository_policy(source_root: Path) -> None:
@@ -315,6 +439,7 @@ def validate_repository_policy(source_root: Path) -> None:
         "docs/PROJECT_FRAMING.md",
         "docs/DECISIONS.md",
         "docs/TRACEABILITY.md",
+        "standard/docs/",
         "Do not generalize that to user projects",
     ):
         if needle not in agents_text:
@@ -368,94 +493,8 @@ def validate_installed_cache_layout() -> None:
             )
 
 
-def run_hook(script: Path, sample: dict[str, object]) -> subprocess.CompletedProcess[str]:
-    env = os.environ.copy()
-    env["PLUGIN_ROOT"] = str(ROOT)
-    proc = subprocess.run(
-        [sys.executable, str(script)],
-        input=json.dumps(sample),
-        text=True,
-        capture_output=True,
-        env=env,
-        check=False,
-    )
-    if proc.returncode != 0:
-        try:
-            script_label = script.relative_to(ROOT)
-        except ValueError:
-            script_label = script
-        fail(f"{script_label} exited {proc.returncode}: {proc.stderr}")
-    return proc
-
-
-def hook_sample(cwd: Path) -> dict[str, object]:
-    return {
-        "hook_event_name": "SessionStart",
-        "source": "startup",
-        "cwd": str(cwd),
-        "session_id": "test",
-        "transcript_path": None,
-        "model": "gpt-test",
-        "permission_mode": "default",
-    }
-
-
-def copy_standard_agents(target: Path) -> list[Path]:
-    target.mkdir(parents=True, exist_ok=True)
-    sources = sorted((ROOT / "standard" / "agents").glob("promode_*.toml"))
-    for source in sources:
-        shutil.copy2(source, target / source.name)
-    return sources
-
-
-def validate_drift_hook_clean_project(script: Path) -> None:
-    with tempfile.TemporaryDirectory(prefix="promode-codex-clean-") as tmp:
-        project = Path(tmp)
-        (project / ".git").mkdir()
-        copy_standard_agents(project / ".codex" / "agents")
-        proc = run_hook(script, hook_sample(project))
-        if proc.stdout.strip():
-            fail("drift hook should be quiet when project agents match plugin agents")
-
-
-def validate_drift_hook_warning(script: Path) -> None:
-    with tempfile.TemporaryDirectory(prefix="promode-codex-drift-") as tmp:
-        project = Path(tmp)
-        (project / ".git").mkdir()
-        agents_dir = project / ".codex" / "agents"
-        sources = copy_standard_agents(agents_dir)
-        if len(sources) < 2:
-            fail("drift validation needs at least two standard agent templates")
-
-        missing_name = sources[0].name
-        changed_name = sources[1].name
-        (agents_dir / missing_name).unlink()
-        with (agents_dir / changed_name).open("a", encoding="utf-8") as handle:
-            handle.write("\n# drift validation edit\n")
-        (agents_dir / "promode_removed.toml").write_text(
-            "name = \"promode_removed\"\n",
-            encoding="utf-8",
-        )
-
-        proc = run_hook(script, hook_sample(project))
-        if not proc.stdout.strip():
-            fail("drift hook should warn when project agents differ")
-        output = json.loads(proc.stdout)
-        if "project Promode agents need update" not in output.get("systemMessage", ""):
-            fail("drift hook systemMessage should flag project agent drift")
-        hook_output = output.get("hookSpecificOutput", {})
-        if hook_output.get("hookEventName") != "SessionStart":
-            fail("drift hook output missing SessionStart hookEventName")
-        context = hook_output.get("additionalContext", "")
-        for needle in (
-            "Promode Codex project-agent drift detected.",
-            f"Missing: {missing_name}.",
-            f"Changed: {changed_name}.",
-            "Extra: promode_removed.toml.",
-            "`managing-promode-codex` update workflow",
-        ):
-            if needle not in context:
-                fail(f"drift hook warning missing text: {needle}")
+def is_promode_hook_command(command: object) -> bool:
+    return isinstance(command, str) and any(name in command for name in PROMODE_HOOK_NAMES)
 
 
 def validate_agents() -> None:
@@ -472,6 +511,11 @@ def validate_agents() -> None:
         if name in READ_ONLY_AGENTS and data.get("sandbox_mode") != "read-only":
             fail(f"{path.name} must be read-only")
         instructions = data["developer_instructions"]
+        if "Hook-provided transcript paths" in instructions:
+            fail(f"{path.name} contains stale hook-era transcript wording")
+        for phrase in COMMON_AGENT_CONTRACT_PHRASES:
+            if phrase not in instructions:
+                fail(f"{path.name} missing shared doctrine phrase: {phrase}")
         for phrase in AGENT_CONTRACT_PHRASES.get(name, []):
             if phrase not in instructions:
                 fail(f"{path.name} missing contract phrase: {phrase}")
@@ -485,6 +529,7 @@ def validate_agents() -> None:
 
 def validate_skills() -> None:
     skills_root = ROOT / "skills"
+    seen = set()
     for skill in sorted(path for path in skills_root.iterdir() if path.is_dir()):
         skill_md = skill / "SKILL.md"
         check_file(skill_md)
@@ -497,12 +542,27 @@ def validate_skills() -> None:
         frontmatter = text[4:frontmatter_end]
         if "name:" not in frontmatter or "description:" not in frontmatter:
             fail(f"{skill.name} SKILL.md needs name and description")
+        name = skill_frontmatter_name(frontmatter)
+        if name:
+            seen.add(name)
+    missing = REQUIRED_SKILLS - seen
+    if missing:
+        fail(f"missing required skills: {sorted(missing)}")
+
+
+def skill_frontmatter_name(frontmatter: str) -> str:
+    for line in frontmatter.splitlines():
+        if line.startswith("name:"):
+            return line.split(":", 1)[1].strip().strip("\"'")
+    return ""
 
 
 def validate_package() -> None:
     validate_manifest()
-    validate_hook()
+    validate_activation_flow()
+    validate_doctrine_bundle()
     validate_installer()
+    validate_upgrade_check_parsing()
     validate_agents()
     validate_skills()
 

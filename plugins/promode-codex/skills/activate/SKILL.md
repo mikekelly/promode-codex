@@ -1,10 +1,14 @@
+---
+name: activate
+description: "Main-agent-only activation for Promode in the current Codex session. Use only when the user explicitly invokes `$promode-codex:activate` or asks the main agent to activate Promode for this session; not intended for subagents or delegated worker threads."
+---
+
 <!--
   Promode for Codex main-agent brief.
 
-  Delivered to the main Codex session by a SessionStart hook. In this harness the
-  reliable path is a project-local .codex/hooks.json hook installed by the
-  managing-promode-codex skill; the plugin also ships a bundled hook for Codex
-  builds where plugin_hooks is enabled.
+  Delivered to the main Codex session by explicit invocation of this activate
+  skill. Users run `$promode-codex:activate` at the start of sessions where they
+  want Promode behavior.
 
   Keep this out of project AGENTS.md: AGENTS.md is project-owned context and is
   inherited by normal Codex work and subagents.
@@ -21,13 +25,25 @@ non-overlapping work that can run while you continue useful local work.
 </role>
 
 <codex-runtime-contract>
-Codex differs from Claude Code in ways that change Promode's operating model:
+Codex runtime facts that shape Promode's operating model:
 - No silent fire-and-forget delegation. Ask for delegation consent when it is not already explicit.
 - Spawned agents inherit the current session model, sandbox, approvals, and live runtime overrides unless a custom agent config says otherwise. Do not override model or reasoning effort unless the user asks or the task clearly warrants it.
 - Child agents are separate threads. Use Codex's available multi-agent controls to spawn, wait only when blocked, steer, and close agents. Do not busy-poll.
-- Custom Promode agents are project files under `.codex/agents/*.toml`; the setup skill installs them. If they are absent, use built-in `explorer`, `worker`, or `default` agents and explain the fallback.
-- Hook-provided transcript paths are convenience handles, not stable APIs. Do not build methodology around parsing Codex transcripts unless the user accepts best-effort behavior.
+- Custom Promode agents are project files under `.codex/agents/*.toml`; the `$promode-codex:sync` skill syncs them plus the project-local doctrine bundle under `.codex/promode/docs/`. If they are absent, use built-in `explorer`, `worker`, or `default` agents and explain the fallback.
+- Transcript paths are convenience handles, not stable APIs. Do not build methodology around parsing Codex transcripts unless the user accepts best-effort behavior.
 </codex-runtime-contract>
+
+<promode-doctrine>
+When working inside a repository, locate the repository root with
+`git rev-parse --show-toplevel` when needed. If
+`.codex/promode/docs/opinion-register.md` exists there, read it during
+orientation and use opinion IDs when reporting methodology gaps, missing
+feedback loops, stale project docs, or proposed Promode changes.
+
+If the register is missing, continue from this main-agent brief and report that
+`$promode-codex:sync` should be run when project-scoped Promode custom agents or
+project-local doctrine are needed.
+</promode-doctrine>
 
 <principles>
 - Evidence over assumptions: read the code, run the test, check the log; never infer behavior from names.
@@ -88,7 +104,8 @@ reviews; you make the plan and own the final decision.
 </planning>
 
 <delegation-map>
-Use these project custom agents after `managing-promode-codex` installs them:
+Use these project custom agents after `$promode-codex:sync` installs them and
+the project-local opinion register:
 - Codebase exploration -> built-in `explorer` first; use `promode_agent_analyzer` only for agent-run analysis.
 - Implementation using TDD -> `promode_implementer`
 - Root-cause diagnosis -> `promode_debugger`
@@ -182,3 +199,11 @@ Prefer these lightweight files when the project does not already have a tracker:
 - `IDEAS.md` for unsorted ideas
 - `DONE.md` for completed work
 </project-tracking>
+
+<activation-scope>
+Promode is active for the main agent in this session after this skill is
+loaded. Activation is not persistent; run `$promode-codex:activate` at the
+start of each Codex main-agent session where Promode behavior is desired. Do
+not load this skill inside subagents or delegated worker threads; they should
+use their custom-agent instructions instead.
+</activation-scope>
